@@ -1,0 +1,28 @@
+# Local workspace data and dependencies
+/data/
+node_modules/
+.env
+.env.*
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+
+# Local investigation records and backups
+/docs/evidence/
+/backups/
+/captures/
+/evidence/
+/work/
+/outputs/
+*.har
+*.pcap
+*.pcapng
+*.bak
+*.backup
+
+# Machine/editor files
+.DS_Store
+*.log
+.vscode/
+.idea/

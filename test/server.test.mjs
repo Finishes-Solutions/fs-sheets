@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {mkdtemp,rm} from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {once} from 'node:events';
+test('API persists, applies rules, prevents stale writes, and restores undo',async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'fs-sheet-test-'));const port=String(24000+Math.floor(Math.random()*12000));
+ const start=()=>spawn(process.execPath,['server.mjs'],{env:{...process.env,PORT:port,DB_PATH:path.join(dir,'test.sqlite')},stdio:['ignore','pipe','pipe']});
+ let proc=start();const ready=async p=>{await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Server startup timed out')),10000);p.stdout.on('data',b=>{if(b.toString().includes('sheets is ready')){clearTimeout(timer);resolve();}});p.on('exit',code=>{clearTimeout(timer);reject(Error('Server exited '+code));});});};
+ const stop=async()=>{proc.kill('SIGTERM');await once(proc,'exit');};const url=`http://127.0.0.1:${port}`;const get=()=>fetch(url+'/api/state').then(r=>r.json());const post=(route,body,headers={})=>fetch(url+route,{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)});
+ try{await ready(proc);const initial=await get();const sh=initial.state.sheets[0],status=sh.columns.find(c=>c.name==='Status'),done=sh.columns.find(c=>c.name==='Done');sh.automations.push({id:'rule',name:'Complete task',columnId:status.id,equals:'Complete',targetColumnId:done.id,value:'true',enabled:true});sh.rows[0].cells[status.id]='Complete';let r=await post('/api/state',initial);assert.equal(r.status,200);const saved=await r.json();assert.equal(saved.state.sheets[0].rows[0].cells[done.id],true);assert.equal(saved.revision,initial.revision+1);
+ assert.equal((await post('/api/state',initial)).status,409);assert.equal((await post('/api/state',saved,{Origin:'https://example.com'})).status,403);
+ await stop();proc=start();await ready(proc);const restored=await get();assert.equal(restored.revision,saved.revision);assert.equal(restored.state.sheets[0].rows[0].cells[done.id],true);
+ r=await post('/api/undo',{revision:restored.revision});assert.equal(r.status,200);const undone=await r.json();assert.equal(undone.state.sheets[0].rows[0].cells[done.id],false);
+ const bad=structuredClone(undone);bad.state.sheets[0].rows[0].parentId=bad.state.sheets[0].rows[0].id;assert.equal((await post('/api/state',bad)).status,400);
+ const version=await fetch(url+'/api/version').then(r=>r.json());assert.equal(version.revision,undone.revision);
+ const shared=structuredClone(undone);shared.state.dashboards=[{id:'dash',workspaceId:shared.state.workspaces[0].id,name:'Team overview',sheetIds:[sh.id],panels:['status','owners']}];shared.state.feedback=[{id:'note',title:'Review this',description:'A test note',by:'Alex',at:new Date().toISOString(),status:'Open'}];
+ const clientHeaders={'X-Sheets-Client':'tester-a','X-Sheets-Tester':'Alex'};
+ r=await post('/api/state',{...shared,label:'Saved team dashboard'},clientHeaders);assert.equal(r.status,200);const teamSaved=await r.json();assert.equal(teamSaved.state.activity.at(-1).by,'Alex');assert.equal(teamSaved.state.dashboards[0].name,'Team overview');
+ assert.equal((await post('/api/undo',{revision:teamSaved.revision},{'X-Sheets-Client':'tester-b'})).status,409);
+ assert.equal((await post('/api/undo',{revision:teamSaved.revision},clientHeaders)).status,200);
+ const reviewState=await get();const reviewedRow=reviewState.state.sheets[0].rows[0];reviewedRow.proofs=[{id:'proof-test',name:'Creative brief',reviewers:['Alex'],versions:[{id:'proof-v1',by:'Alex',at:'2026-11-02T12:00:00Z',file:{name:'brief.txt',type:'text/plain',data:'data:text/plain;base64,YnJpZWY='},comments:[],decisions:[{id:'decision-1',by:'Alex',at:'2026-11-02T13:00:00Z',decision:'Approved',text:''}]}]}];
+ r=await post('/api/state',reviewState,clientHeaders);assert.equal(r.status,200);const proofSaved=await r.json();await stop();proc=start();await ready(proc);assert.deepEqual((await get()).state.sheets[0].rows[0].proofs,reviewedRow.proofs);
+ const invalidProof=structuredClone(proofSaved);invalidProof.state.sheets[0].rows[0].proofs[0].versions[0].decisions[0].by='Unknown';assert.equal((await post('/api/state',invalidProof,clientHeaders)).status,400);
+ assert.equal((await post('/api/undo',{revision:proofSaved.revision},clientHeaders)).status,200);assert.equal((await get()).state.sheets[0].rows[0].proofs,undefined);
+ assert.equal((await fetch(url+'/lib/proofs.mjs')).status,200);
+ assert.equal((await fetch(url+'/lib/reporting.mjs')).status,200);
+ assert.equal((await fetch(url+'/')).status,200);assert.equal((await fetch(url+'/lib/formulas.mjs')).status,200);
+ }finally{if(proc.exitCode===null)await stop();await rm(dir,{recursive:true,force:true});}
+});
