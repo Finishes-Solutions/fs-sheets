@@ -1,6 +1,6 @@
 # sheets
 
-A working local foundation for an independent Smartsheet-style product. Version 0.3 adds left-side row tools and local file proofing to the monochrome sheets workspace. It is not complete Smartsheet compatibility.
+A working local foundation for an independent Smartsheet-style product. Version 0.4 adds row locking, sheet tools, typed columns, local requests, mentions, and multi-action workflows to the monochrome sheets workspace. It is not complete Smartsheet compatibility.
 
 ## Run
 
@@ -19,17 +19,20 @@ Open http://127.0.0.1:4317. Keep the terminal running. Stop with Ctrl+C. Set `PO
 ## Working features
 
 - Workspaces and folders; create, rename, move sheets between folders, duplicate sheets.
-- Typed columns: text, number, single-select, date, checkbox, and free-text contacts.
-- Editable table; multi-cell paste; search, status filtering, sorting; row hierarchy and collapse.
-- Column and cell formulas; arithmetic, comparisons, 34 functions, ranges, hierarchy, and cross-sheet references.
+- 30 column types, including multi-select, symbols, stable item IDs, auto-number, people, timeline ranges, connected sheet rows, links, location, currency/percent/rating, audit fields, files, and latest comment. Specialized editors preserve structured values.
+- Editable table; typed multi-cell paste; search, saved AND/OR filters with row properties and parent context; three-key sibling sorting; row hierarchy and collapse. Blanks sort last and dropdowns use option order.
+- Column and cell formulas with a preview editor and reference insertion; arithmetic, comparisons, 34 functions, ranges, hierarchy, and cross-sheet references. Sheet summary fields support values and formulas.
+- Manual cell/row/column formatting, text wrap, style copying, and ordered conditional formatting rules with row/column scope, enable/pause, duplicate, and delete.
 - Board with draggable cards and configurable lanes; month calendar and date-range Gantt/timeline with field mappings.
 - Saved column visibility, widths, and order; rounded monochrome interface with keyboard search (⌘K / Ctrl+K).
 - Saved reports with source selection, AND/OR conditions, selected columns, grouping, sorting, leaf-row scope, CSV export, and editable source details.
 - Saved dashboards with status/date/owner/metric mappings, configurable panels, completion, status mix, workload, upcoming due dates, and source drilldown.
 - Local intake forms with selected fields and required-field rules that append rows to their destination sheet.
 - Test lab with a persistent checklist, feedback, status tracking, and tester labels.
-- Cell-change automations that assign a value to another field; enable/pause/delete workflows.
-- Left-side row controls for paperclip attachments, comments, and proofing; the controls stay visible during horizontal scrolling.
+- Workflows with cell-change, row-added and date triggers, AND/OR conditions, and ordered actions: change cell, lock row, create update/approval request, or notify a local inbox. Date rules are checked every minute while the server runs.
+- Local update/approval requests with selected fields, recipient responses, cancellation and history. Local people directory, comment mention chips and per-name inboxes.
+- Left-side row controls for paperclip attachments, comments, proofing, and locking; the controls stay visible during horizontal scrolling.
+- Server-enforced row locks protect cells and hierarchy from edits, deletion, paste, board moves, and automation writes. Unlock separately before editing; comments and attachments remain available. Locks prevent accidental changes, not access by an authenticated role.
 - Dedicated row panels with comment threads and downloadable attachments (2 MB per file).
 - Local proofs from new uploads or existing attachments, file-version history, review comments, assigned reviewer labels, approvals, and change requests. New versions start fresh reviews; prior decisions remain visible. Raster images preview inline; other formats download for native inspection.
 - CSV import/export; JSON backup/restore; print; activity history; 50-step undo.
@@ -63,13 +66,16 @@ Application limits: 100 sheets, 100 columns per sheet, 10,000 rows per sheet, an
 npm test
 ```
 
-Twenty-three automated tests cover formulas and cycle errors, rejection of executable input, report filtering/grouping/sorting/CSV, dashboard aggregates, API persistence across restart, automation, optimistic concurrency, hierarchy validation, session-scoped undo, proof validation, version approvals, and proof persistence across restart. Integration tests bind a temporary loopback port and use disposable SQLite files.
+Thirty-four automated tests cover rich-cell validation, stable auto-numbers, locks, conditional formats, hierarchy sorting, mentions, request creation and date-workflow deduplication, as well as formulas and cycle errors, rejection of executable input, report filtering/grouping/sorting/CSV, dashboard aggregates, API persistence across restart, automation, optimistic concurrency, hierarchy validation, session-scoped undo, proof validation, version approvals, and proof persistence across restart. Integration tests bind a temporary loopback port and use disposable SQLite files.
 
-Browser checks exercised inline edits and formulas, row-detail saves, grouped report creation, mapped dashboards, selected-field form submission, saved hidden columns and board lanes, feedback/checklist persistence, and the 390 px dashboard layout. Row tool placement, posting comments, creating proofs from existing attachments, recording changes/approvals, creating new versions, and historical approvals were also browser-tested. The automated file chooser was blocked by Chrome extension local-file permissions; new-file upload still needs manual verification. Drag-and-drop, attachment downloads, CSV round-trips, and all UI edge cases still need a broader regression suite.
+Version 0.4 browser checks verified row lock/unlock, a timeline column and range, directory people, resolved mention delivery, conditional color and bold output, saved filters, formula preview/save, local update-request submission, and a cell-change workflow that locks a row. The sheet toolbar and sticky controls were reviewed at 1366 px. Earlier browser checks exercised inline edits and formulas, row-detail saves, grouped report creation, mapped dashboards, selected-field form submission, saved hidden columns and board lanes, feedback/checklist persistence, and the 390 px dashboard layout. Row tool placement, posting comments, creating proofs from existing attachments, recording changes/approvals, creating new versions, and historical approvals were also browser-tested. The automated file chooser was blocked by Chrome extension local-file permissions; new-file upload still needs manual verification. Drag-and-drop, attachment downloads, CSV round-trips, and all UI edge cases still need a broader regression suite.
 
 ## Project structure
 
 - `server.mjs`: local HTTP API, validation, persistence, undo, automation.
+- `lib/columns.mjs`: shared column catalog, typed validation and display values.
+- `lib/sheet-tools.mjs`: filters, hierarchy-aware sorting, formats and lock checks.
+- `lib/workflows.mjs`: metadata, mentions, local workflow execution and date deduplication.
 - `lib/formulas.mjs`: shared formula parser and evaluator; no `eval`.
 - `lib/proofs.mjs`: proof validation and reviewer status calculation.
 - `lib/reporting.mjs`: shared report queries, aggregation, distribution, and CSV.
@@ -81,6 +87,6 @@ Browser checks exercised inline edits and formulas, row-detail saves, grouped re
 - `docs/REA-FINDINGS.md`: initial static package inspection and evidence boundaries.
 - `docs/LIVE-OBSERVATIONS.md`: sanitized first-pass observations from the running application and concrete feature gaps.
 
-See the parity ledger for the remaining work toward the requested full product.
+See [the v0.4 guide](docs/SHEET-TOOLS.md) for the new controls and exact limitations, and the parity ledger for the remaining work toward the requested full product.
 
 If port 4317 is already in use, stop the existing sheets terminal with Ctrl+C before starting another instance. Keep only one server running against this project database.

@@ -19,11 +19,11 @@ No login, permissions, remote access, real-time cell merging, dependency schedul
 
 The database is `data/fs-sheet.sqlite`. Never copy an active SQLite database without a backup-aware tool; its journal may contain recent changes. Prefer the in-app JSON export, or stop the server before copying all database files.
 
-Run `npm test` for the 23 automated checks. Browser checks are documented in README. Drag/drop, attachment downloads, CSV round-trips, and broader accessibility/keyboard regression remain test work.
+Run `npm test` for the 34 automated checks. Browser checks are documented in README. Drag/drop, attachment downloads, CSV round-trips, and broader accessibility/keyboard regression remain test work.
 
 ## Left-side row tools and proofing
 
-The paperclip, speech bubble, and review icons sit immediately before the first data column on every table row. They stay visible when scrolling sideways. Badges show attachment, comment, or proof counts.
+The paperclip, speech bubble, review, and lock icons sit immediately before the first data column on every table row. They stay visible when scrolling sideways. Badges show attachment, comment, or proof counts.
 
 - Paperclip: choose a file and click Add attachment; download or remove saved files. Files are limited to 2 MB. Removing a row attachment does not remove a proof version created from it, because the proof stores its own snapshot.
 - Comments: post a note under your tester label. Comments persist with the row.
@@ -32,3 +32,7 @@ The paperclip, speech bubble, and review icons sit immediately before the first 
 - These are local reviews: no email invitations, notifications, drawing annotations, PDF/video markup, or identity verification are implemented. Raster images preview; other files download.
 
 Manual upload check: use the regular file chooser to attach a small file, reload, then download it and compare contents. Browser automation could not complete new-file uploads because its Chrome extension lacked local-file access. Proof reviews and version transitions were tested with synthetic API fixtures and the existing-attachment path.
+
+## Version 0.4 sheet tools
+
+Follow [Sheet tools](SHEET-TOOLS.md) to test locks, typed cells, conditional rules, filters, formulas, requests, mentions and workflows. Use a scratch sheet. Automated checks cover engine/API behavior; new-file upload still needs the manual check above.

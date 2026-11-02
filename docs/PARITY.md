@@ -1,15 +1,15 @@
 # Capability ledger and implementation sequence
 
-Updated 2026-11-02. The goal is an independent tool covering the user's sheet, view, formula, workspace, and surrounding workflow needs. Version 0.3 is a functional local testing foundation. It does not establish full feature parity or compatibility with Smartsheet.
+Updated 2026-11-02. The goal is an independent tool covering the user's sheet, view, formula, workspace, and surrounding workflow needs. Version 0.4 is a functional local testing foundation. It does not establish full feature parity or compatibility with Smartsheet.
 
 ## Status
 
-| Area | Working in 0.3 | Remaining work |
+| Area | Working in 0.4 | Remaining work |
 | --- | --- | --- |
 | Organization | Workspaces, one-level folders, sheet creation/rename/move/duplicate | Nested folders, collections, favorites, trash, workspace templates, cross-workspace moves |
-| Grid | Editable cells, typed columns, multi-cell paste, row selection, indentation, collapse, search/filter/sort, saved column widths/order/visibility | Virtualization, range selection, fill handle, drag resizing, frozen columns, formatting rules, locked rows/columns, row moves/copies between sheets |
-| Column model | Text, numbers, single-select, dates, checkbox, free-text contacts | Multi-select, symbol sets, contact identity, auto-number, system columns, duration, latest-comment column, robust conversion/validation |
-| Formulas | Arithmetic/comparison, cell/column formulas, same-column ranges, selected text/date/logical/aggregate/lookup functions, hierarchy, named cross-sheet lookup | Complete function catalog, exact coercion/blank/error semantics, reference rewriting on structural changes, named cross-sheet range management, dependency graph and incremental recalculation, compatibility fixtures |
+| Grid | Editable cells, typed columns, multi-cell paste, row selection, indentation, collapse, saved filters/three-key sibling sorting, column manager, manual/conditional formatting, row locks | Virtualization, range selection, fill handle, drag resizing, frozen columns, locked columns, row moves/copies between sheets |
+| Column model | 30 types: core values, multi-select, symbols, people, IDs/auto-number, timeline, connected rows, links/location, currency/percent/rating, audit fields, files/latest-comment, typed validation | Verified contact identity, two-way connections/mirrors, geocoding, complete monday app-specific column parity, scheduling-aware duration |
+| Formulas | Arithmetic/comparison, cell/column formulas, same-column ranges, selected text/date/logical/aggregate/lookup functions, hierarchy, named cross-sheet lookup; preview editor and sheet-summary formula fields | Complete function catalog, exact coercion/blank/error semantics, reference rewriting on structural changes, named cross-sheet range management, dependency graph and incremental recalculation, compatibility fixtures |
 | Table/grid | One table implementation | Distinct behavior parity for legacy grid and modern table features |
 | Board/card | One board implementation, configurable text/contact/dropdown lanes, drag to change field | Lane order, card field settings, grouping, collapsed lanes, separate legacy card compatibility |
 | Calendar | Month grid with date mapping | Week view, multi-day events, drag/resize, calendar feeds |
@@ -17,8 +17,8 @@ Updated 2026-11-02. The goal is an independent tool covering the user's sheet, v
 | Reports | Source sheets, AND/OR filters, selected columns, grouping, sorting, leaf-row scope, CSV, editable source detail | Arbitrary grouped aggregates, sheet-summary reports, permission-aware results |
 | Dashboards | Saved dashboards with mapped fields and panel selection; metrics, status donut, workload, upcoming dates, source drilldown | Freeform widget layouts, charts from reports, rich text, embedding, published dashboards |
 | Forms | Local forms with field selection, typed input, required-field rules, submission into sheets | Field order, conditional logic, branding, hidden values, public endpoints, attachments, spam controls |
-| Automations | Cell-value transition sets another cell; toggles and activity | Time triggers, branching, approval/update requests, notifications, copy/move/lock actions, transactional event queue, retries/idempotency, execution history |
-| Collaboration | Local notes, attachments, tester labels, feedback/checklist, activity, change polling and stale-draft download; left-side row tools; file proof versions, comments, approvals/change requests | Users, sharing roles, inherited permissions, mentions, presence, concurrent editing, notifications, cell history, proof annotations, PDF/video inline review, verified reviewer identities, notifications |
+| Automations | Cell-change, new-row and date triggers; conditions; ordered set-cell/lock/request/inbox actions; enable/pause/edit/delete; last-run counts; once-per-row/date markers | Branching, recurring schedules, copy/move actions, external email/push, transactional event queue, retries, full execution history |
+| Collaboration | Local notes, attachments, tester labels, feedback/checklist, activity, change polling and stale-draft download; left-side row tools; file proof versions, comments, approvals/change requests; local directory, mention chips/inbox; local update and approval requests | Authenticated users, sharing roles, inherited permissions, presence, concurrent editing, external notifications, cell history, proof annotations, PDF/video inline review, verified reviewer identities, notifications |
 | Data interchange | CSV values, whole-project JSON restore, printing | XLSX/MS Project import/export, Smartsheet account migration, type/formula mapping, stable external IDs, conflict reports |
 | Platform | Loopback server, SQLite, local backups, stale-save rejection | Normalized storage, migrations, per-entity commands, tenant/user model, object storage, scalable search, observability, deployment and restore procedures |
 | Extended suite | Not implemented | Resource management, portfolio provisioning, Control Center-like templates/updates, Dynamic View-style restricted views, data connectors, Data Shuttle-style ingestion, document generation, WorkApps-style portals, APIs/webhooks, AI assistance |
