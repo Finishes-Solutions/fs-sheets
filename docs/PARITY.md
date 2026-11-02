@@ -36,7 +36,7 @@ Updated 2026-11-02. The goal is an independent tool covering the user's sheet, v
 
 The desktop package alone cannot establish server-side behavior. Build a representative, user-authorized test workspace with nested tasks, typed fields, formulas, cross-sheet references, report/dashboard, form, and automation. Observe and record one behavior at a time using synthetic records. Do not alter existing business sheets merely to gather evidence. Read-only account inspection can identify which templates and workflows matter most; changes or outbound notifications need their own concrete scope.
 
-The existing application was inspected statically only. No live Smartsheet sheets, contacts, credentials, or workspace records were accessed during this build.
+The initial investigation inspected the packaged Electron shell statically. On 2026-11-02, a first pass through the running macOS application directly observed sheet tools, workspace navigation, attachments/proofing, automation management, reports, and dashboard editing controls without saving business-content changes. See [Live observations](LIVE-OBSERVATIONS.md) for the sanitized findings, evidence boundaries, and unresolved behavior. These are native-UI observations, not REA runtime Evidence, and do not establish full feature parity.
 
 ## Official reference map
 

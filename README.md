@@ -78,7 +78,8 @@ Browser checks exercised inline edits and formulas, row-detail saves, grouped re
 - `test/`: formula, reporting, and API tests.
 - `docs/TESTING.md`: local team testing guide.
 - `docs/PARITY.md`: capability ledger and implementation sequence.
-- `docs/REA-FINDINGS.md`: local Smartsheet inspection and evidence boundaries.
+- `docs/REA-FINDINGS.md`: initial static package inspection and evidence boundaries.
+- `docs/LIVE-OBSERVATIONS.md`: sanitized first-pass observations from the running application and concrete feature gaps.
 
 See the parity ledger for the remaining work toward the requested full product.
 
