@@ -29,7 +29,7 @@ let selectionKind='cells',copiedStructure=null,lockCycleUntil=0;
 let sheetZoom=Math.max(50,Math.min(150,Number(localStorage.getItem('sheets-grid-zoom'))||100));
 let sheetWrap=localStorage.getItem('sheets-grid-wrap')==='true';
 let cellRange=null,rangeDrag=null,columnDrag=null;
-let buildInfo={version:'0.9.0',build:'unknown'};
+let buildInfo={version:'0.9.1',build:'unknown'};
 
 let state,revision,workspaceId,sheetId,page='home',view='Table',query='',statusFilter='',sortCol='',sortDir=1,saving=false,selected=new Set(),collapsed=new Set(),month=new Date(),calc;
 const app=$('#app'),dialog=$('#dialog');let submitHandler;
@@ -215,7 +215,7 @@ const iconPaths={
  more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
 };
 iconPaths.inbox='<path d="M4 4h16l2 12v4H2v-4L4 4Z"/><path d="M2 15h6l2 3h4l2-3h6"/>';iconPaths.help='<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4"/><path d="M12 16h.01"/>';
-Object.assign(iconPaths,{redo:'<path d="m16 3 5 5-5 5M21 8H10a7 7 0 0 0 0 14"/>',filter:'<path d="M3 4h18l-7 8v7l-4 2v-9Z"/>',sort:'<path d="M7 4v16m-4-4 4 4 4-4M17 20V4m-4 4 4-4 4 4"/>',columns:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16m6-16v16"/>',format:'<path d="m4 14 8-10 8 10-8 7Z"/><path d="m4 14 16 0"/>',rules:'<path d="m4 11 7-7 8 8-7 7-8-8Zm1 0h13M8 3l5 5M20 15s-2 2.5-2 4a2 2 0 0 0 4 0c0-1.5-2-4-2-4Z"/>',summary:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>'});
+Object.assign(iconPaths,{redo:'<path d="m16 3 5 5-5 5M21 8H10a7 7 0 0 0 0 14"/>',filter:'<path d="M3 4h18l-7 8v7l-4 2v-9Z"/>',sort:'<path d="M7 4v16m-4-4 4 4 4-4M17 20V4m-4 4 4-4 4 4"/>',columns:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16m6-16v16"/>',format:'<rect x="4" y="3" width="13" height="5" rx="1.5"/><path d="M17 5.5h2.5v5H11v3"/><rect x="9.5" y="13.5" width="3" height="7.5" rx="1"/>',rules:'<path d="m4 11 7-7 8 8-7 7-8-8Zm1 0h13M8 3l5 5M20 15s-2 2.5-2 4a2 2 0 0 0 4 0c0-1.5-2-4-2-4Z"/>',summary:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>'});
 const icon=(name,size=18)=>`<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPaths[name]||iconPaths.sheet}</svg>`;
 const monochrome=['#171717','#707070','#b0b0b0','#d7d7d7','#eeeeee'];
 function statusGradient(items,total){if(!total)return '#ededed';let start=0;return 'conic-gradient('+items.map((item,i)=>{const end=start+item.count/total*100;const segment=monochrome[i%monochrome.length]+' '+start+'% '+end+'%';start=end;return segment;}).join(',')+')';}
