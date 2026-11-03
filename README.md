@@ -134,3 +134,7 @@ A **＋** at the far left of the column headers adds columns with a grouped type
 ## 0.8 — patch saves, merging tabs, continuous scrolling
 
 Saves send only changed cells and fields; undo history stores small reverse patches. Edits from two tabs to different cells merge, and only true same-cell conflicts are blocked. The grid scrolls continuously instead of paging 50 rows at a time, arrow keys can pick formula references, and the formula drawer sits beside the sheet. See [docs/UX-REVIEW-2026-11.md](docs/UX-REVIEW-2026-11.md) §6.
+
+## 0.9 — side panel, Excel export, Smartsheet import, templates
+
+Row side panel with comments, files, proofs and cell history; formulas that survive renames; selection totals, fill handle, frozen columns, drag-to-reorder and find & replace; `.xlsx` export with live formulas; Smartsheet API import that verifies every formula; project templates and budget-vs-actual portfolio rollups. See [docs/FEATURES-v0.9.md](docs/FEATURES-v0.9.md).

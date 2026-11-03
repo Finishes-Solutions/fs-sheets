@@ -41,3 +41,10 @@ See [UX-REVIEW-2026-11.md](UX-REVIEW-2026-11.md) for verification details.
 - **Arrow keys while typing a formula** (caret after `=`, an operator, `(` or `,`): pick a cell reference; Shift+arrow extends it into a range.
 - **⌘G / Go to row** takes the row number shown in the grid.
 - The grid scrolls continuously; ⌘↑/⌘↓ jump to the first and last rows.
+
+## Update — v0.9.0
+
+- **⇧⌘H / Shift+Ctrl+H**: find and replace.
+- **Fill handle**: drag the square at the corner of a selection.
+- **Drag a row number or column title** to move it.
+- **Row panel**: ↑/↓ step rows, ←/→ switch tabs, ⌘Enter posts a comment, Esc closes.
