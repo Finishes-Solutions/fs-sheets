@@ -42,11 +42,14 @@ test('API sheets convert with hierarchy, types, formulas, comments and verificat
 
 test('API endpoint imports through a mock Smartsheet API and never stores the token',async()=>{
  const token='TESTTOKEN_abcdefghijklmnopqrstuvwxyz';let auth=null;
+ const withFiles={...budget,rows:budget.rows.map(r=>r.id===502?{...r,attachments:[{id:77,name:'spec.pdf',attachmentType:'FILE',mimeType:'application/pdf',sizeInKb:1},{id:78,name:'Drawings folder',attachmentType:'GOOGLE_DRIVE',url:'https://drive.example/x'},{id:79,name:'huge.zip',attachmentType:'FILE',sizeInKb:9000}]}:r)};
  const api=http.createServer((req,res)=>{auth=req.headers.authorization;const send=o=>{res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(o));};
+  if(req.url==='/files/77'){assert.equal(req.headers.authorization,undefined,'token is not sent to the file host');res.writeHead(200,{'Content-Type':'application/pdf'});return res.end('%PDF-1.4 test');}
   if(req.headers.authorization!=='Bearer '+token){res.writeHead(401);return res.end('{}');}
+  if(req.url==='/sheets/111/attachments/77')return send({id:77,name:'spec.pdf',mimeType:'application/pdf',url:'http://127.0.0.1:'+api.address().port+'/files/77'});
   if(req.url.startsWith('/sheets?'))return send({data:[{id:111,name:budget.name},{id:222,name:'Rates'}]});
   if(req.url.startsWith('/serverinfo'))return send({formats:{color:palette}});
-  if(req.url.startsWith('/sheets/111'))return send(budget);if(req.url.startsWith('/sheets/222'))return send(rates);res.writeHead(404);res.end('{}');});
+  if(req.url.startsWith('/sheets/111'))return send(withFiles);if(req.url.startsWith('/sheets/222'))return send(rates);res.writeHead(404);res.end('{}');});
  api.listen(0,'127.0.0.1');await once(api,'listening');
  const dir=await mkdtemp(path.join(os.tmpdir(),'sheets-ss-')),port=String(46000+Math.floor(Math.random()*3000)),dbFile=path.join(dir,'db.sqlite');
  const proc=spawn(process.execPath,['server.mjs'],{env:{...process.env,PORT:port,DB_PATH:dbFile,SMARTSHEET_API_BASE:'http://127.0.0.1:'+api.address().port},stdio:['ignore','pipe','pipe']});
@@ -59,6 +62,9 @@ test('API endpoint imports through a mock Smartsheet API and never stores the to
   const imp=await post('smartsheet/import',{token,revision:st.revision,sheetIds:['222','111']});
   assert.equal(imp.status,200);assert.equal(imp.report.sheets.length,2);
   const job=imp.state.sheets.find(x=>x.name==='Job 42 Budget');assert.equal(job.rows.length,3);assert.equal(job.workspaceId,imp.importedWorkspaceId);
+  const files=job.rows.flatMap(r=>r.attachments);assert.equal(files.length,1);assert.equal(files[0].name,'spec.pdf');assert.equal(Buffer.from(files[0].data.split(',')[1],'base64').toString(),'%PDF-1.4 test');
+  const jr=imp.report.sheets.find(x=>x.name==='Job 42 Budget');assert.equal(jr.attachmentsCopied,1);assert.equal(jr.attachmentsNotCopied,2);
+  assert.deepEqual(jr.attachmentsSkipped.map(a=>a.name+': '+a.reason),['Drawings folder: link (google drive: https://drive.example/x)','huge.zip: larger than 2 MB']);
   assert.equal((await post('smartsheet/import',{token,revision:imp.revision,sheetIds:['111']})).status,409,'re-import is refused');
   proc.kill('SIGTERM');await once(proc,'exit');
   const raw=(await readFile(dbFile)).toString('latin1');assert.ok(!raw.includes(token),'token not persisted');

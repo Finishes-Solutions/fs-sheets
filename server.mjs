@@ -17,7 +17,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {seed,id} from './lib/seed.mjs';
 import {diffState,applyPatch,historyPatch,isEmptyPatch} from './lib/state-patch.mjs';
 import {buildWorkbookSpec} from './lib/excel-export.mjs';
-import {API_BASES,smartsheetGet,convertSheets,verifyFormulas} from './lib/smartsheet-import.mjs';
+import {API_BASES,smartsheetGet,convertSheets,verifyFormulas,fetchAttachments} from './lib/smartsheet-import.mjs';
 import {ensureSchema,readStored,packState,writePacked,migrateToSheetStore} from './lib/store.mjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const dbPath=process.env.DB_PATH||path.join(root,'data','fs-sheet.sqlite');
@@ -81,11 +81,13 @@ const server=http.createServer(async(req,res)=>{const send=(status,data)=>{res.w
  if(Array.isArray(input.sheets)){apiSheets=input.sheets.filter(x=>x&&typeof x==='object'&&Array.isArray(x.columns));}
  else{if(!Array.isArray(input.sheetIds)||!input.sheetIds.length||input.sheetIds.length>30)return send(400,{error:'Choose 1–30 sheets to import.'});
   const info=await smartsheetGet(input.token,'/serverinfo',{base}).catch(()=>({}));palette=Array.isArray(info?.formats?.color)?info.formats.color:[];
-  for(const sid of input.sheetIds){if(!/^\d+$/.test(String(sid)))return send(400,{error:'Invalid Smartsheet sheet id'});apiSheets.push(await smartsheetGet(input.token,'/sheets/'+sid+'?include=format,discussions,crossSheetReferences',{base}));}}
+  for(const sid of input.sheetIds){if(!/^\d+$/.test(String(sid)))return send(400,{error:'Invalid Smartsheet sheet id'});apiSheets.push(await smartsheetGet(input.token,'/sheets/'+sid+'?include=format,discussions,crossSheetReferences,attachments',{base}));}}
  const known=new Set(cur.state.sheets.map(x=>x.source?.smartsheetId!=null?String(x.source.smartsheetId):null).filter(Boolean)),skipped=apiSheets.filter(x=>known.has(String(x.id))).map(x=>x.name);
  apiSheets=apiSheets.filter(x=>!known.has(String(x.id)));if(!apiSheets.length)return send(409,{error:skipped.length?'Already imported: '+skipped.join(', '):'No sheets to import.'});
  const next=structuredClone(cur.state),workspace={id:id(),name:'Smartsheet import '+new Date().toISOString().slice(0,10)};next.workspaces.push(workspace);
- const {sheets,report}=convertSheets(apiSheets,{workspaceId:workspace.id,makeId:id,palette,existingNames:new Set(cur.state.sheets.map(x=>x.name))});
+ const {sheets,report,pendingAttachments}=convertSheets(apiSheets,{workspaceId:workspace.id,makeId:id,palette,existingNames:new Set(cur.state.sheets.map(x=>x.name))});
+ if(pendingAttachments.length&&!Array.isArray(input.sheets)){const room=60*1024*1024-Buffer.byteLength(cur.body)-Buffer.byteLength(JSON.stringify(sheets));await fetchAttachments(input.token,sheets,report,pendingAttachments,{base,budgetBytes:Math.max(0,room),makeId:id,allowHttp:!!process.env.SMARTSHEET_API_BASE});}
+ else for(const p of pendingAttachments){const sr=report.sheets[p.sheetIndex];sr.attachmentsNotCopied++;if(sr.attachmentsSkipped.length<50)sr.attachmentsSkipped.push({row:p.rowNumber,name:p.name,reason:'not downloaded'});}
  next.sheets.push(...sheets);verifyFormulas(next,sheets,report);report.skipped=skipped;
  const result=save(next,cur.revision,'Imported '+sheets.length+' sheet'+(sheets.length===1?'':'s')+' from Smartsheet',false,actor,client);
  return send(200,{...result,importedWorkspaceId:workspace.id,report});
