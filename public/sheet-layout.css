@@ -566,3 +566,41 @@ body.tv-mode .dashboard-canvas{padding:20px 24px}body.tv-mode .widget-grid{grid-
 @media(max-width:640px){.widget-grid{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}}
 body.tv-mode .app-rail,body.tv-mode .page-dashboards>.sheet-heading,body.tv-mode #content>.sheet-heading{display:none!important}body.tv-mode #app{display:block!important}
 .widget.wide .widget-chart{max-height:280px}
+/* v0.11 files: thumbnails, camera, preview */
+.row-thumb{width:18px;height:18px;object-fit:cover;border-radius:3px;display:block}
+.file-thumb{width:56px;height:56px;flex:none;border:1px solid var(--ui-line);border-radius:8px;overflow:hidden;padding:0;background:#f5f5f6;display:grid;place-items:center;font-weight:700;font-size:12px;cursor:zoom-in}
+.file-thumb img{width:100%;height:100%;object-fit:cover}.file-thumb.pdf{cursor:pointer}
+.panel-camera{display:flex;align-items:center;justify-content:center;gap:6px;margin:8px 0 4px;height:40px;border:1px solid var(--ui-line);border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.panel-camera input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.panel-camera:focus-within{outline:2px solid var(--ui-focus);outline-offset:1px}
+.file-preview{margin:0;text-align:center}.file-preview img{max-width:100%;max-height:70vh;border-radius:8px}.file-preview figcaption{color:var(--ui-muted);font-size:12px;margin-top:8px}
+dialog.wide-dialog.preview-dialog{max-width:min(1000px,calc(100vw - 24px))}
+.panel-details{display:grid;gap:10px}.panel-details .field{margin:0}.panel-actions.sticky{position:sticky;bottom:0;background:#fff;padding:10px 0;border-top:1px solid var(--ui-line)}
+/* v0.11 phone layout */
+.mobile-cards{padding:8px 12px 96px}.mobile-cards ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.m-count{margin:4px 2px 8px;font-size:12px;color:var(--ui-muted)}
+.m-card button{width:100%;text-align:left;background:#fff;border:1px solid var(--ui-line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;font:inherit;color:inherit;margin-left:calc(var(--depth,0) * 10px);width:calc(100% - var(--depth,0) * 10px)}
+.m-card.parent button{background:#f7f7f8}.m-card .m-title{font-weight:650;font-size:15px;line-height:1.3}
+.m-card dl{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}.m-card dt{font-size:11px;color:var(--ui-muted)}.m-card dd{margin:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-thumbs{display:flex;gap:6px}.m-thumbs img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--ui-line)}
+.m-meta{display:flex;gap:10px;align-items:center;color:var(--ui-muted);font-size:12px}.m-meta svg{width:14px;height:14px;vertical-align:-2px}
+.m-more{display:block;margin:12px auto 0;height:40px;padding:0 18px}
+@media (max-width:640px){
+ #app{display:block!important}
+ .app-rail{position:fixed!important;left:0;right:0;bottom:0;top:auto!important;height:60px!important;width:auto!important;flex-direction:row!important;justify-content:space-around;align-items:center;z-index:70;padding:0 4px env(safe-area-inset-bottom)!important;border-top:1px solid #2a2a2e}
+ .app-rail>*:first-child{display:none}.app-rail button,.app-rail a{min-height:48px}
+ #app>.sidebar{display:none!important}
+ main{min-height:100dvh;padding-bottom:60px}
+ .page-sheet .sheet-heading{padding:10px 14px!important;min-height:0!important}.page-sheet .sheet-heading h1{font-size:17px!important}
+ .page-sheet .heading-actions>button:not([data-action="add-row"]){display:none}
+ .page-sheet .sheet-commandbar{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.page-sheet .sheet-commandbar::-webkit-scrollbar{display:none}
+ .page-sheet .grid-pagination,.page-sheet .sheet-footer{display:none}
+ #row-side-panel{position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100dvh!important;z-index:90;border-radius:0!important}
+ #row-side-panel .panel-head{position:sticky;top:0;background:#fff;z-index:2}
+ #row-side-panel .panel-tabs [role="tab"]{height:44px}
+ #row-side-panel input,#row-side-panel select,#row-side-panel textarea{font-size:16px}
+ .topbar{padding:8px 12px!important}
+}
+.m-card button{justify-items:stretch;justify-content:stretch;align-content:start;text-align:left}
+.m-card dl,.m-card .m-title,.m-card .m-meta,.m-card .m-thumbs{width:100%;justify-self:stretch}
+@media (max-width:640px){.app-rail>:not(button):not(a):not(nav){display:none!important}.app-rail{gap:0}.app-rail>button,.app-rail>a{flex:1}}
