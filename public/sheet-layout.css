@@ -613,3 +613,5 @@ dialog.wide-dialog.preview-dialog{max-width:min(1000px,calc(100vw - 24px))}
 .command-search.is-active>summary{background:#ececee;border-radius:7px;color:#1d1d1f;gap:4px;padding:0 8px}
 .command-search .search-chip{font-size:12px;font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .empty-inline button{margin-left:8px}
+/* Phones: the card list is the scrolling area (the page itself is fixed-height on sheet pages). */
+@media (max-width:640px){#content.page-sheet .mobile-cards{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}}

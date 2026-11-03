@@ -392,7 +392,6 @@ document.addEventListener('dragstart',e=>{const card=e.target.closest('[data-dra
 document.addEventListener('dragover',e=>{if(e.target.closest('[data-lane]'))e.preventDefault();});
 document.addEventListener('drop',e=>{const lane=e.target.closest('[data-lane]');if(!lane)return;e.preventDefault();const row=e.dataTransfer.getData('text/plain');if(!sheet().rows.some(r=>r.id===row))return;mutate('Moved card',n=>n.sheets.find(s=>s.id===sheetId).rows.find(r=>r.id===row).cells[lane.dataset.column]=lane.dataset.lane);});
 
-try{const [r,buildResponse]=await Promise.all([fetch('/api/state'),fetch('/api/build').catch(()=>null)]);if(buildResponse?.ok)buildInfo=await buildResponse.json();if(!r.ok)throw Error('Could not open the workspace');({state,revision}=await r.json());let saved=null;try{saved=JSON.parse(localStorage.getItem('sheets-location')||'null');}catch{}({workspaceId,sheetId,page,view,reportId,dashboardId}=resolveLocation(state,saved));readRoute();render();}catch(e){app.innerHTML=`<section class="empty"><h1>Couldn’t open sheets</h1><p>${esc(e.message)}</p><p>Start the local server with <code>npm start</code> and reload.</p></section>`;}
 
 // The row gutter stays visible while the data grid scrolls horizontally.
 function rowIcon(kind){const paths={sheet:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 10v10"/>',check:'<path d="m5 12 4.5 4.5L19 7"/>',history:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',attachment:'<path d="m8 12 6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l9-9"/><path d="m6 14 8-8"/>',comment:'<path d="M20 11a8 8 0 0 1-8 8H4l-3 3V11a9 9 0 0 1 19 0Z"/><path d="M6 9h9M6 13h6"/>',lock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/>',proof:'<path d="M5 3h10l4 4v14H5Z"/><path d="M14 3v5h5m-11 6 3 3 5-6"/>'};return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[kind]}</svg>`;}
@@ -1047,7 +1046,6 @@ function paintPresence(){
 document.addEventListener('focusin',queuePresence);document.addEventListener('click',queuePresence);window.addEventListener('hashchange',queuePresence);
 setInterval(()=>{if(liveOK&&!document.hidden)sendPresence(true);},25000);
 window.addEventListener('pagehide',()=>{fetch('/api/presence',{method:'POST',headers:{'Content-Type':'application/json','X-Sheets-Tester':testerName,'X-Sheets-Client':clientId},body:'{"leave":true}',keepalive:true}).catch(()=>{});});
-startLive();
 
 // ---- Versions & backups ----
 // Named versions, automatic daily backups and "before restore" safety copies. Restoring is per sheet:
@@ -1207,3 +1205,6 @@ Object.assign(actions,{
  'folder-import-run':async el=>{el.disabled=true;el.textContent='Checking…';try{const x=await request('/api/imports/run',{id:el.dataset.id});const n=(x.results||[]).length;toast(x.busy?'An import is already running.':n?`Imported ${n} file${n===1?'':'s'}.`:'No new files.');}catch(e){toast(e.message);}folderImportsModal();},
  'folder-import-delete':async el=>{if(!confirm('Stop watching this folder? Imported rows stay in the sheet.'))return;await request('/api/imports/delete',{id:el.dataset.id});folderImportsModal();}
 });
+
+// Start-up runs last so every helper and table defined above is ready before the first render.
+try{const [r,buildResponse]=await Promise.all([fetch('/api/state'),fetch('/api/build').catch(()=>null)]);if(buildResponse?.ok)buildInfo=await buildResponse.json();if(!r.ok)throw Error('Could not open the workspace');({state,revision}=await r.json());let saved=null;try{saved=JSON.parse(localStorage.getItem('sheets-location')||'null');}catch{}({workspaceId,sheetId,page,view,reportId,dashboardId}=resolveLocation(state,saved));readRoute();render();startLive();}catch(e){app.innerHTML=`<section class="empty"><h1>Couldn’t open sheets</h1><p>${esc(e.message)}</p><p>Start the local server with <code>npm start</code> and reload.</p></section>`;}
