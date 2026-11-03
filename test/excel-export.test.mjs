@@ -56,3 +56,11 @@ test('python writer produces a workbook Excel can read back',{skip:!existsSync('
   assert.match(out,/\['Budget', 'Rates 2025'\] =B3 \* C3 2 "\$"#,##0\.00 A2 1 Comments/);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('formulas with syntax errors are exported as their value with the formula in a note', async () => {
+  const {toExcelFormula}=await import('../lib/excel-export.mjs');
+  const ctx={sheet:{rows:[{id:'r'}]},rowIndex:0,colIndex:0,colLetter:new Map([['total cost','E']]),idLetter:new Map(),rowExcel:new Map(),children:new Map(),sheets:new Map()};
+  assert.deepEqual(toExcelFormula('=SUM([Total Cost]1:',ctx),{ok:false,reason:'formula has a syntax error'});
+  assert.deepEqual(toExcelFormula('=1+',ctx),{ok:false,reason:'formula has a syntax error'});
+  assert.equal(toExcelFormula('=SUM([Total Cost]1:[Total Cost]3)',ctx).formula,'=SUM(E2:E4)');
+});
