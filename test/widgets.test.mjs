@@ -13,7 +13,7 @@ test('totals and groups use leaf rows, filters and aggregations', () => {
   assert.deepEqual(widgetData(st,{type:'bar',sheetId:'s',groupBy:'job',agg:'sum',valueColumn:'amt'}).points,[{label:'A',value:125},{label:'B',value:50}]);
   assert.deepEqual(widgetData(st,{type:'line',sheetId:'s',groupBy:'due',agg:'count'}).points.map(p=>p.value),[2,1],'grouped by month in order');
   assert.throws(()=>validateWidgets(st,{widgets:[{id:'w',type:'pie',sheetId:'s'}]}),/Invalid dashboard widget/);
-  assert.throws(()=>validateWidgets(st,{widgets:[{id:'w',type:'bar',sheetId:'gone'}]}),/deleted sheet/);
+  assert.doesNotThrow(()=>validateWidgets(st,{widgets:[{id:'w',type:'bar',sheetId:'gone',groupBy:'deleted-col'}]}),'a deleted sheet or column never blocks saving');
 });
 
 test('charts label every value and escape text', () => {
