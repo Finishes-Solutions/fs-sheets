@@ -387,3 +387,17 @@ body.filling,body.filling *{cursor:crosshair!important;user-select:none}
 #ss-filter{width:100%;box-sizing:border-box;margin-top:10px}
 .ss-report{width:100%;border-collapse:collapse;font-size:12.5px}.ss-report th,.ss-report td{padding:6px 8px;border-bottom:1px solid #eee;text-align:left}.ss-report td:not(:first-child),.ss-report th:not(:first-child){text-align:right}
 .ss-issues{max-height:240px;overflow:auto;font-size:12.5px;padding-left:18px}
+
+/* ---- Budget rollup (monochrome) ---- */
+.budget-rollup{margin:0 0 18px;padding:16px 18px;border:1px solid #e3e3e5;border-radius:10px;background:#fff}
+.budget-chart{display:block;max-width:760px;margin:8px 0 14px;font:12px Inter,-apple-system,sans-serif}
+.budget-chart .bar-budget{fill:#2b2b2e}.budget-chart .bar-actual{fill:#a3a3a8}.budget-chart .bar-actual.over{fill:#5c5c61;stroke:#1d1d1f;stroke-width:1}
+.budget-chart .chart-label,.budget-chart .chart-legend text{fill:#333}.budget-chart .chart-value{fill:#444;font-variant-numeric:tabular-nums}.budget-chart .chart-value.over{font-weight:700;fill:#1d1d1f}
+.rollup-table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.rollup-table th,.rollup-table td{padding:7px 8px;border-bottom:1px solid #eee;text-align:right}.rollup-table th:first-child,.rollup-table td:first-child,.rollup-table td.muted{text-align:left}
+.rollup-table tr.over td:nth-child(4){font-weight:700}.rollup-table tfoot th{border-top:1.5px solid #333;border-bottom:0}
+
+/* Sidebar: the workspace tree scrolls inside the remaining space; the bottom section never overlaps it */
+.sidebar>*{flex:none}
+.sidebar>.sheet-tree{flex:1 1 auto;min-height:64px;overflow-y:auto;overscroll-behavior:contain}
+.sidebar>.sidebar-bottom{flex:none;background:inherit}
