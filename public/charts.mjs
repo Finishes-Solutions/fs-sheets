@@ -1,0 +1,9 @@
+// Monochrome SVG charts (no colored chrome). Values are labelled so the chart reads without color.
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function budgetActualChart(items,{format=v=>String(v),width=640}={}){
+ const rows=items.filter(x=>x.budget!=null||x.actual!=null);if(!rows.length)return '';
+ const label=170,valueW=110,plot=width-label-valueW-16,barH=11,gap=8,rowH=barH*2+gap+10,height=rows.length*rowH+28;
+ const max=Math.max(1,...rows.flatMap(x=>[x.budget||0,x.actual||0]));const w=v=>Math.max(v>0?2:0,Math.round((Math.max(0,v||0)/max)*plot));
+ const body=rows.map((x,i)=>{const y=i*rowH+24,over=x.budget!=null&&x.actual!=null&&x.actual>x.budget;return `<g><title>${esc(x.name)}: budget ${esc(format(x.budget))}, actual ${esc(format(x.actual))}</title><text x="0" y="${y+barH+2}" class="chart-label">${esc(x.name.length>26?x.name.slice(0,25)+'…':x.name)}</text><rect x="${label}" y="${y}" width="${w(x.budget)}" height="${barH}" rx="2" class="bar-budget"/><rect x="${label}" y="${y+barH+3}" width="${w(x.actual)}" height="${barH}" rx="2" class="bar-actual ${over?'over':''}"/><text x="${width-valueW}" y="${y+barH-1}" class="chart-value">${esc(format(x.budget))}</text><text x="${width-valueW}" y="${y+barH*2+2}" class="chart-value ${over?'over':''}">${esc(format(x.actual))}${over?' ▲':''}</text></g>`;}).join('');
+ return `<svg class="budget-chart" viewBox="0 0 ${width} ${height}" width="100%" role="img" aria-label="Budget versus actual by project"><g class="chart-legend"><rect x="${label}" y="2" width="10" height="10" rx="2" class="bar-budget"/><text x="${label+16}" y="11">Budget</text><rect x="${label+80}" y="2" width="10" height="10" rx="2" class="bar-actual"/><text x="${label+96}" y="11">Actual (▲ over budget)</text></g>${body}</svg>`;
+}

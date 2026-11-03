@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {preferredWorkspaceId,resolveLocation} from '../lib/navigation.mjs';
+const state={workspaces:[{id:'demo'},{id:'imported'},{id:'empty'}],sheets:[{id:'sample',workspaceId:'demo'},{id:'orders',workspaceId:'imported',source:{file:'orders.xlsx'}},{id:'schedule',workspaceId:'imported',source:{file:'schedule.xlsx'}}]};
+test('fresh navigation opens the imported workspace instead of the first demo',()=>{assert.equal(preferredWorkspaceId(state),'imported');assert.deepEqual(resolveLocation(state),{workspaceId:'imported',sheetId:'orders',page:'home',view:'Table',reportId:'all-work',dashboardId:'workspace-overview'});});
+test('saved valid workspace and sheet selections are honored',()=>{const location=resolveLocation(state,{workspaceId:'demo',sheetId:'sample',page:'sheet',view:'Board'});assert.equal(location.workspaceId,'demo');assert.equal(location.sheetId,'sample');assert.equal(location.page,'sheet');assert.equal(location.view,'Board');});
+test('stale workspace IDs recover from an existing selected sheet',()=>{const location=resolveLocation(state,{workspaceId:'old-workspace',sheetId:'schedule',page:'sheet'});assert.equal(location.workspaceId,'imported');assert.equal(location.sheetId,'schedule');});
+test('mismatched saved workspace and sheet cannot leave cross-workspace context',()=>{const location=resolveLocation(state,{workspaceId:'demo',sheetId:'orders',page:'sheet'});assert.equal(location.workspaceId,'demo');assert.equal(location.sheetId,'sample');});
+test('empty workspaces recover to overview and unrecognized pages or views are discarded',()=>{assert.equal(resolveLocation(state,{workspaceId:'empty',page:'sheet'}).page,'home');const location=resolveLocation(state,{page:'unknown',view:'unknown'});assert.equal(location.page,'home');assert.equal(location.view,'Table');assert.equal(resolveLocation(state,null).workspaceId,'imported');});
+test('a workspace without imported data remains usable',()=>{const plain={workspaces:[{id:'normal'}],sheets:[{id:'one',workspaceId:'normal'}]};assert.equal(resolveLocation(plain).sheetId,'one');});

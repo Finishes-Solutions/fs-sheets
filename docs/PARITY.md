@@ -2,7 +2,11 @@
 
 Updated 2026-11-02. The goal is an independent tool covering the user's sheet, view, formula, workspace, and surrounding workflow needs. Version 0.4 is a functional local testing foundation. It does not establish full feature parity or compatibility with Smartsheet.
 
-## Status
+## Current implementation update
+
+The table below is the original 0.4 baseline. Significant formula, import, column, scheduling, and premium-style planning workflows have since been implemented. Use [Requested feature coverage](REQUEST-COVERAGE.md) for the current verified status and [Formula capabilities](FORMULAS.md) for the calculation boundaries.
+
+## Original 0.4 status
 
 | Area | Working in 0.4 | Remaining work |
 | --- | --- | --- |
