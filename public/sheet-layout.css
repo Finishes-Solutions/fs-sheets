@@ -357,3 +357,25 @@ dialog.formula-drawer .modal-body,dialog.rules-drawer .modal-body{max-height:non
 #row-side-panel .panel-history p{margin:4px 0;word-break:break-word}
 #row-side-panel .danger-text{color:#a11}
 #row-side-panel :focus-visible{outline:2px solid #2b2b2e;outline-offset:1px}
+
+/* ---- Frozen columns ---- */
+.page-sheet .grid td.frozen{position:sticky;z-index:3;background-color:#fff}
+.page-sheet .grid th.frozen{position:sticky;top:0;z-index:7}
+.page-sheet .grid .frozen-edge{box-shadow:inset -2px 0 0 #b9b9be}
+
+/* ---- Fill handle ---- */
+.page-sheet .grid td.cell{position:relative}
+.page-sheet .grid td.frozen{position:sticky}
+.fill-handle{position:absolute;right:-4px;bottom:-4px;width:8px;height:8px;background:#1d1d1f;border:1.5px solid #fff;border-radius:1px;cursor:crosshair;z-index:4}
+body.filling,body.filling *{cursor:crosshair!important;user-select:none}
+.page-sheet .grid td.fill-preview{outline:1.5px dashed #555;outline-offset:-2px;background-image:linear-gradient(#1d1d1f0d,#1d1d1f0d)}
+
+/* ---- Drag to reorder ---- */
+.page-sheet .grid .row-number-button[draggable="true"]{cursor:grab}
+.page-sheet .grid tr.drop-before td{box-shadow:inset 0 2px 0 #1d1d1f}
+.page-sheet .grid th.drop-before{box-shadow:inset 2px 0 0 #1d1d1f}
+
+/* ---- Find & replace ---- */
+.find-replace-link{display:block;width:100%;margin-top:8px;padding:6px 8px;border:0;background:transparent;text-align:left;font-size:12px;color:#333;border-radius:5px}
+.find-replace-link:hover{background:#ececee}
+.fr-options{display:flex;flex-wrap:wrap;gap:6px 16px;margin:4px 0 8px}
