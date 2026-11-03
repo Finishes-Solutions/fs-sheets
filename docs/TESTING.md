@@ -15,11 +15,11 @@ Open http://localhost:4317 while `npm run dev` runs in the project folder. No in
 
 ## Limits for this testing round
 
-No login, permissions, remote access, real-time cell merging, dependency scheduling, or complete Smartsheet formula compatibility. Forms are local. Keep one server/database instance running; Dropbox sync does not coordinate database writers. The grid is not virtualized. Use small sample projects and small attachments (2 MB/file, 15 MB/project save).
+No login, permissions, remote access, real-time cell merging, dependency scheduling, or complete Smartsheet formula compatibility. Forms are local. Keep one server/database instance running; Dropbox sync does not coordinate database writers. The grid is not virtualized. Use small sample projects and small attachments (2 MB/file, 64 MB/project save).
 
 The database is `data/fs-sheet.sqlite`. Never copy an active SQLite database without a backup-aware tool; its journal may contain recent changes. Prefer the in-app JSON export, or stop the server before copying all database files.
 
-Run `npm test` for the 34 automated checks. Browser checks are documented in README. Drag/drop, attachment downloads, CSV round-trips, and broader accessibility/keyboard regression remain test work.
+Run `npm test` for the automated checks (212 passed in the November 2, 2026 run). Browser checks are documented in README. Drag/drop, attachment downloads, CSV round-trips, and broader accessibility/keyboard regression remain test work.
 
 ## Left-side row tools and proofing
 
@@ -36,3 +36,17 @@ Manual upload check: use the regular file chooser to attach a small file, reload
 ## Version 0.4 sheet tools
 
 Follow [Sheet tools](SHEET-TOOLS.md) to test locks, typed cells, conditional rules, filters, formulas, requests, mentions and workflows. Use a scratch sheet. Automated checks cover engine/API behavior; new-file upload still needs the manual check above.
+
+
+## November 2 budget and grid verification
+
+The full suite passed 212 tests. After the final inference adjustment, the focused budget/date tests passed again. Browser checks used an isolated SQLite database on port 4318, leaving production rows unchanged.
+
+- In-page date calendar: select, clear, month/year navigation and persisted date edits.
+- Anchored column ellipsis menu and side-panel properties; fit-to-content changes persisted.
+- At 80%, 100% and 150%: rectangular selection, six-cell Excel TSV copy/paste with quoted multiline text, editing, and wrapping.
+- Rapid consecutive Owner/date edits both persisted after reload; saves are queued.
+- Budget quantity change recalculated detail and parent totals; Undo restored the original amount.
+- Production import independently reconciled 148,772 cells against the original Excel extraction. All five pre-existing sheets were unchanged.
+
+See BUDGET-IMPORT.md for inference assumptions and source issues. These checks do not establish enterprise security or multi-user readiness.
