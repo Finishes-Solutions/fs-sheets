@@ -455,3 +455,19 @@ body.filling,body.filling *{cursor:crosshair!important;user-select:none}
 tr.peer-row td.row-num{box-shadow:inset 3px 0 0 #1d1d1f}
 td.peer-cell{outline:2px dashed #6b6b70;outline-offset:-2px}
 #save-status.live-note{color:var(--ui-ink);font-weight:600}
+/* v0.11 versions & backups */
+dialog.wide-dialog.versions-dialog{width:min(1100px,calc(100vw - 32px));max-width:min(1100px,calc(100vw - 32px))}
+.version-save{display:flex;gap:10px;align-items:flex-end}.version-save .field{flex:1;margin:0}
+.version-layout{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:16px;margin-top:8px;min-height:360px}
+.version-list{list-style:none;margin:0;padding:0;border:1px solid var(--ui-line);border-radius:8px;max-height:56vh;overflow:auto}
+.version-item{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--ui-line)}.version-item:last-child{border-bottom:0}
+.version-item.current{background:#f2f2f4;box-shadow:inset 3px 0 0 #1d1d1f}
+.version-main{flex:1;min-width:0}.version-name{font-weight:600;font-size:13px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.version-kind{font-size:10.5px;font-weight:600;color:var(--ui-muted);border:1px solid var(--ui-line);border-radius:999px;padding:1px 7px}
+.version-meta{font-size:11.5px;color:var(--ui-muted);margin-top:2px}
+.version-detail{border:1px solid var(--ui-line);border-radius:8px;padding:12px 14px;max-height:56vh;overflow:auto}
+.version-sheet h3{margin:0 0 8px;font-size:15px}.version-stats{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;margin-bottom:10px}
+.version-diff table{width:100%;border-collapse:collapse;font-size:12px}.version-diff th,.version-diff td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--ui-line);vertical-align:top}
+.version-diff th{font-size:11px;color:var(--ui-muted);font-weight:600}.version-diff td.then{color:var(--ui-muted);text-decoration:line-through}.version-diff td.now{font-weight:600}
+.empty-note{padding:16px;color:var(--ui-muted);font-size:13px}
+@media(max-width:760px){.version-layout{grid-template-columns:1fr}.version-save{flex-direction:column;align-items:stretch}}

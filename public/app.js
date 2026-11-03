@@ -647,7 +647,7 @@ function workspaceHub(){
  <section class="hub-tool-note"><span>${icon('settings',21)}</span><div><h3>All your sheet tools, within reach</h3><p>Open a sheet for File, Edit, View, Insert, Format, and Automate menus. Row locks sit beside proofing on the left of each row.</p></div>${button('Show me','feature-guide')}</section></div>`;
 }
 function sheetMenus(s){const item=(label,action,extra='')=>button(label,action,extra,'sheet-menu-item');const groups=[
- ['File',item('Sheet settings','sheet-settings')+item('Import Excel / CSV','import')+item('Import from Smartsheet','smartsheet-import')+item('Export & backup','export-menu')+item('Duplicate sheet','duplicate')+item('Print current view','print')],
+ ['File',item('Sheet settings','sheet-settings')+item('Import Excel / CSV','import')+item('Import from Smartsheet','smartsheet-import')+item('Versions & backups…','versions')+item('Export & backup','export-menu')+item('Duplicate sheet','duplicate')+item('Print current view','print')],
  ['Edit',item('Undo last change','undo')+item('Find and replace…','find-replace')+item('Add row','add-row')+item('Make child of row above','indent',selected.size||selectedRange()?'':'disabled')+item('Move out one level','outdent',selected.size||selectedRange()?'':'disabled')],
  ['View',item('Filters','sheet-filter')+item('Sort rows','sort')+item('Column visibility & order','columns-manager')+item('Board / calendar mappings','view-options')],
  ['Insert',item('New row','add-row')+item('New column · '+columnTypes.length+' types','new-column')+item('Cell or column formula','formula-editor')+item('Sheet summary','sheet-summary')],
@@ -1021,3 +1021,36 @@ document.addEventListener('focusin',queuePresence);document.addEventListener('cl
 setInterval(()=>{if(liveOK&&!document.hidden)sendPresence(true);},25000);
 window.addEventListener('pagehide',()=>{fetch('/api/presence',{method:'POST',headers:{'Content-Type':'application/json','X-Sheets-Tester':testerName,'X-Sheets-Client':clientId},body:'{"leave":true}',keepalive:true}).catch(()=>{});});
 startLive();
+
+// ---- Versions & backups ----
+// Named versions, automatic daily backups and "before restore" safety copies. Restoring is per sheet:
+// as a copy beside the current sheet, or replacing it (undoable, and a safety version is saved first).
+const VERSION_KIND={named:'Named',auto:'Automatic','before-restore':'Before restore'};
+const fmtBytes=n=>n>1e6?(n/1e6).toFixed(1)+' MB':Math.max(1,Math.round(n/1e3))+' KB';
+const fmtWhen=iso=>new Date(iso).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+async function versionsModal(focusId=null){
+ let list=[];try{const r=await fetch('/api/versions');list=(await r.json()).versions||[];}catch{toast('Could not load versions.');return;}
+ const s=page==='sheet'?sheet():null;
+ const rows=list.map(v=>`<li class="version-item${v.id===focusId?' current':''}"><div class="version-main"><div class="version-name">${esc(v.name)}<span class="version-kind">${VERSION_KIND[v.kind]||esc(v.kind)}</span></div><div class="version-meta">${esc(fmtWhen(v.at))} · ${esc(v.by)} · ${v.sheets.length} sheet${v.sheets.length===1?'':'s'} · ${fmtBytes(v.bytes)}${v.note?' · '+esc(v.note):''}</div></div>${button(s?'Compare this sheet':'Compare','version-compare',`data-id="${esc(v.id)}"`,'secondary')}</li>`).join('');
+ modal('Versions & backups',`<div class="version-save"><label class="field"><span>Save a version of the whole workspace</span><input name="versionName" placeholder="e.g. Before Q1 bid revisions" maxlength="120"></label>${button(icon('check',15)+' Save version','version-save','','primary')}</div>
+ <p class="hint">Automatic backups run once a day while the app is open (kept 14 days, then weekly for 8 weeks). Named versions are kept until you delete them. Files are stored in <code>backups/versions</code>.</p>
+ <div class="version-layout"><ul class="version-list" aria-label="Saved versions">${rows||'<li class="empty-note">No versions yet. Save one above, or wait for the first automatic backup.</li>'}</ul><section id="version-detail" class="version-detail" aria-live="polite"><p class="hint">Choose <b>Compare</b> to see what changed since that version${s?' in '+esc(s.name):''}.</p></section></div>`,()=>false,'Close');
+ dialog.classList.add('wide-dialog','versions-dialog');dialog.querySelector('.modal-foot button[type=submit]')?.remove();
+ if(focusId)actions['version-compare']({dataset:{id:focusId}});
+}
+Object.assign(actions,{
+ versions:()=>versionsModal(),
+ 'version-save':async()=>{const input=dialog.querySelector('[name=versionName]');const name=input?.value.trim();if(!name){toast('Name the version first.');input?.focus();return;}try{const x=await request('/api/versions',{name});toast('Saved version “'+x.version.name+'”');versionsModal(x.version.id);}catch(e){toast(e.message);}},
+ 'version-compare':async el=>{const id=el.dataset.id,s=page==='sheet'?sheet():null,box=dialog.querySelector('#version-detail');if(!box)return;box.innerHTML='<p class="hint">Comparing…</p>';dialog.querySelectorAll('.version-item').forEach(li=>li.classList.toggle('current',!!li.querySelector(`[data-id="${CSS.escape(id)}"]`)));
+  try{const x=await request('/api/versions/compare',{id,sheetId:s?.id||null});const items=x.sheets;
+   box.innerHTML=items.map(c=>{if(c.status==='deleted since')return `<div class="version-sheet"><h3>${esc(c.name)}</h3><p>This sheet was deleted after the version was saved (${c.rows} rows).</p><div class="action-row">${button('Restore as a copy','version-restore',`data-id="${esc(id)}" data-sheet="${esc(c.sheetId)}" data-mode="copy"`,'primary')}</div></div>`;if(c.status==='added since')return `<div class="version-sheet"><h3>${esc(c.name)}</h3><p>This sheet did not exist yet in that version.</p></div>`;
+    const list=c.samples.map(x=>x.kind==='cell'?`<tr><td>${x.row}</td><td>${esc(x.title)}</td><td>${esc(x.column)}</td><td class="then">${esc(x.then)||'<i>blank</i>'}</td><td class="now">${esc(x.now)||'<i>blank</i>'}</td></tr>`:`<tr><td>${x.row}</td><td>${esc(x.title)}</td><td colspan="3"><b>${esc(x.kind)}</b></td></tr>`).join('');
+    return `<div class="version-sheet"><h3>${esc(c.name)}${c.thenName&&c.thenName!==c.name?` <span class="hint">(was “${esc(c.thenName)}”)</span>`:''}</h3>${c.status==='same'?'<p><b>No changes</b> since this version.</p>':`<div class="version-stats"><span><b>${c.changedCells.toLocaleString()}</b> cells changed</span><span><b>${c.added.toLocaleString()}</b> rows added</span><span><b>${c.removed.toLocaleString()}</b> rows deleted</span><span><b>${c.columnChanges}</b> column/name changes</span><span>${c.rowsThen.toLocaleString()} → ${c.rowsNow.toLocaleString()} rows</span></div>${list?`<div class="version-diff"><table><thead><tr><th>Row</th><th>Item</th><th>Column</th><th>In version</th><th>Now</th></tr></thead><tbody>${list}</tbody></table></div>${c.samples.length>=60?'<p class="hint">Showing the first 60 differences.</p>':''}`:''}
+     <div class="action-row">${button('Restore as a copy','version-restore',`data-id="${esc(id)}" data-sheet="${esc(c.sheetId)}" data-mode="copy"`,'primary')}${button('Replace current sheet…','version-restore',`data-id="${esc(id)}" data-sheet="${esc(c.sheetId)}" data-mode="replace"`,'secondary')}</div><p class="hint">“Restore as a copy” adds the old sheet next to this one and changes nothing else. “Replace” saves a safety version first and can be undone.</p>`}</div>`;}).join('')||'<p>No sheets to compare.</p>';
+  }catch(e){box.innerHTML=`<p class="error">${esc(e.message)}</p>`;}},
+ 'version-restore':async el=>{const {id,sheet:sid,mode}=el.dataset;const name=state.sheets.find(x=>x.id===sid)?.name||'this sheet';
+  if(mode==='replace'&&!confirm(`Replace “${name}” with the saved version?\n\nOther sheets are not changed. A safety version is saved first, and you can undo this.`))return;
+  if(editQueue.pending){toast('Wait for your changes to finish saving, then restore.');return;}
+  try{const x=await request('/api/versions/restore',{id,sheetId:sid,mode,revision});revision=x.revision;editQueue.replaceConfirmed(x.state);dialog.close();
+   if(mode==='copy'&&x.restoredSheetId){const copy=state.sheets.find(s=>s.id===x.restoredSheetId);if(copy){workspaceId=copy.workspaceId;sheetId=copy.id;page='sheet';render();}toast('Restored a copy: '+(copy?.name||''));}else toast('Restored '+name+'. Use Undo to reverse.');}catch(e){toast(e.message);}}
+});
