@@ -1,6 +1,6 @@
 # Local workspace data and dependencies
 /data/
-node_modules/
+node_modules
 .env
 .env.*
 *.sqlite

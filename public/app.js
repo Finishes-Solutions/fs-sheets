@@ -128,7 +128,7 @@ function gridBodyHTML(s,rows,cols){const key=s.id+'|'+sheetWrap;if(key!==gridHei
 function measureGridRows(){const tbody=document.querySelector('table.grid tbody');if(!tbody||gridPrintAll)return;let changed=false;for(const tr of tbody.children){if(tr.classList.contains('grid-spacer'))continue;const id=tr.querySelector('.row-check')?.dataset.row;if(id&&gridHeights.set(id,tr.offsetHeight))changed=true;}gridHeights.freeze();if(!changed)return;const rows=visibleRows(sheet()),end=Math.min(rows.length,gridStart+GRID_WINDOW);const top=tbody.querySelector('.grid-spacer.top td'),bottom=tbody.querySelector('.grid-spacer.bottom td');if(top){const before=top.offsetHeight,px=Math.round(gridHeights.top(rows,gridStart));top.style.height=px+'px';const sc=tbody.closest('.grid-scroll');if(sc&&px!==before&&gridStart>0)sc.scrollTop+=(px-before)*(gridScale(tbody)||1);}if(bottom)bottom.style.height=Math.round(gridHeights.total(rows)-gridHeights.top(rows,end))+'px';}
 function gridScale(tbody){const css=tbody.offsetHeight;return css?tbody.getBoundingClientRect().height/css:1;}
 function updateGridRangeLabel(first,count,total){const el=$('#grid-range-label');if(el)el.textContent=total?`Rows ${(first+1).toLocaleString()}–${Math.min(total,first+count).toLocaleString()} of ${total.toLocaleString()}`:'No rows';}
-function replaceGridBody(s,rows){const tbody=document.querySelector('table.grid tbody');if(!tbody)return render();const hadFocus=tbody.contains(document.activeElement);tbody.innerHTML=gridBodyHTML(s,rows,s.columns.filter(c=>!c.hidden));paintRange();measureGridRows();if(hadFocus){const td=activeCell&&tbody.querySelector(`td[data-grid-row="${CSS.escape(activeCell.rowId)}"][data-grid-col="${CSS.escape(activeCell.colId)}"]`);(td||tbody.closest('table')).focus({preventScroll:true});}}
+function replaceGridBody(s,rows){const tbody=document.querySelector('table.grid tbody');if(!tbody)return render();const hadFocus=tbody.contains(document.activeElement);tbody.innerHTML=gridBodyHTML(s,rows,s.columns.filter(c=>!c.hidden));paintRange();measureGridRows();try{paintPresence();}catch{}if(hadFocus){const td=activeCell&&tbody.querySelector(`td[data-grid-row="${CSS.escape(activeCell.rowId)}"][data-grid-col="${CSS.escape(activeCell.colId)}"]`);(td||tbody.closest('table')).focus({preventScroll:true});}}
 // Ensures visible-row index `i` is rendered; returns true when the body was replaced.
 function ensureRowRendered(i,rows){if(i>=gridStart&&i<gridStart+GRID_WINDOW)return false;gridStart=Math.max(0,i-40);replaceGridBody(sheet(),rows);return true;}
 function syncGridWindow(scroller){const s=sheet();if(!s||page!=='sheet'||view!=='Table'||gridPrintAll)return;const tbody=scroller.querySelector('table.grid tbody');if(!tbody)return;const ed=document.activeElement;if(ed?.dataset?.editing==='true'&&tbody.contains(ed))return;const rows=visibleRows(s),scale=gridScale(tbody)||1,head=scroller.querySelector('thead')?.getBoundingClientRect().height||0,y=Math.max(0,scroller.scrollTop-head)/scale;const first=gridHeights.indexAt(rows,y),count=Math.max(1,gridHeights.indexAt(rows,y+scroller.clientHeight/scale)-first+1);updateGridRangeLabel(first,count,rows.length);if(first>=gridStart+15&&first+count<=gridStart+GRID_WINDOW-15)return;const start=Math.max(0,Math.min(first-40,rows.length-GRID_WINDOW));if(start===gridStart)return;gridStart=start;replaceGridBody(s,rows);}
@@ -249,6 +249,7 @@ function render(){
  paintRange();
  measureGridRows();
  renderRowPanel();
+ try{paintPresence();}catch{}
  const route=new URLSearchParams({workspace:workspaceId||''});if(page==='sheet')route.set('sheet',sheetId);if(page==='reports')route.set('report',reportId);if(planningLabels[page]&&planningSelection)route.set('item',planningSelection);{const hash='#/'+page+'?'+route;if(location.hash!==hash)history.replaceState(null,'',hash);}
 }
 
@@ -368,7 +369,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 document.addEventListener('change',e=>{if(e.target.dataset.testCheck){const key=e.target.dataset.testCheck,checked=e.target.checked;mutate('Updated testing checklist',n=>{n.testing||={};n.testing[key]=checked?{by:testerName,at:new Date().toISOString()}:null;});}if(e.target.dataset.feedbackStatus){const id=e.target.dataset.feedbackStatus,value=e.target.value;mutate('Updated feedback status',n=>n.feedback.find(f=>f.id===id).status=value);}});
 function syncBanner(){return `<div class="sync-banner">A newer version is available. ${conflictDraft?'Save your unsaved draft before loading the latest workspace.':'Your open edit has been kept.'} ${conflictDraft?button('Save unsaved draft','download-draft'):''}${button('Load latest','refresh-state')}</div>`;}
 function notifyRemoteChange(){remoteChanged=true;const banner=$('.sync-banner');if(banner)banner.outerHTML=syncBanner();else $('.topbar').insertAdjacentHTML('afterend',syncBanner());}
-setInterval(async()=>{if(!state||saving||editQueue.pending||document.hidden)return;try{const response=await fetch('/api/version');if(!response.ok)return;const data=await response.json();if(data.revision===revision)return;if(conflictDraft){notifyRemoteChange();return;}if(dialog.open||document.activeElement?.dataset?.editing==='true'||document.activeElement?.matches('textarea,select'))return;const r=await fetch('/api/state');if(!r.ok||saving||editQueue.pending)return;const fresh=await r.json();if(fresh.revision<=revision)return;state=fresh.state;revision=fresh.revision;remoteChanged=false;$('.sync-banner')?.remove();renderPreservingFocus();}catch{/* A temporary disconnect must never discard a draft. */}},4000);
+setInterval(async()=>{if(liveOK||!state||saving||editQueue.pending||document.hidden)return;try{const response=await fetch('/api/version');if(!response.ok)return;const data=await response.json();if(data.revision===revision)return;if(conflictDraft){notifyRemoteChange();return;}if(dialog.open||document.activeElement?.dataset?.editing==='true'||document.activeElement?.matches('textarea,select'))return;const r=await fetch('/api/state');if(!r.ok||saving||editQueue.pending)return;const fresh=await r.json();if(fresh.revision<=revision)return;state=fresh.state;revision=fresh.revision;remoteChanged=false;$('.sync-banner')?.remove();renderPreservingFocus();}catch{/* A temporary disconnect must never discard a draft. */}},4000);
 
 document.addEventListener('click',e=>{const el=e.target.closest('[data-action]');if(el){const fn=actions[el.dataset.action];if(fn)Promise.resolve().then(()=>fn(el)).catch(e=>toast(e.message));}});
 document.addEventListener('keydown',e=>{if(e.target.matches('input.cell-input')&&e.key==='Enter'){e.preventDefault();e.target.blur();}if(e.target.matches('input.cell-input')&&e.key==='Escape'){e.target.value=e.target.dataset.raw||'';e.target.blur();}if(e.target.matches('.task-card')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();rowModal(e.target.dataset.id);}});
@@ -984,3 +985,39 @@ actions['new-from-template']=()=>{const templates=state.folders.filter(f=>f.temp
 // Printing renders every row (the screen only keeps ~120 rows in the page), then restores the window.
 {let saved=0;window.addEventListener('beforeprint',()=>{const s=sheet();if(!s||page!=='sheet'||view!=='Table'||!document.querySelector('table.grid tbody'))return;saved=gridStart;gridPrintAll=true;replaceGridBody(s,visibleRows(s));});
 window.addEventListener('afterprint',()=>{if(!gridPrintAll)return;gridPrintAll=false;gridStart=saved;const s=sheet();if(s&&document.querySelector('table.grid tbody'))replaceGridBody(s,visibleRows(s));});}
+
+// ---- Live updates (server-sent events) and presence ----
+// Other people's saves arrive as patches and are applied without a reload. Presence shows who is
+// looking at which sheet and row. Polling (above) remains as a fallback when the stream is down.
+let liveOK=false,livePresence=[],presenceTimer=0,presenceSent='';
+function initials(name){return String(name||'?').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase()||'?';}
+async function liveCatchUp(){try{const r=await fetch('/api/state');if(!r.ok)return;const fresh=await r.json();if(fresh.revision<=revision||saving||editQueue.pending)return;state=fresh.state;revision=fresh.revision;remoteChanged=false;$('.sync-banner')?.remove();renderPreservingFocus();}catch{}}
+function applyLiveChange(d){
+ if(!state||d.client===clientId||d.revision<=revision)return;
+ if(conflictDraft){notifyRemoteChange();return;}
+ if(saving||editQueue.pending)return; // our queued save is merged by the server and returns the newest state
+ if(d.reload||d.revision!==revision+1||(dialog.open&&!dialog.classList.contains('formula-drawer')))return liveCatchUp();
+ try{const touched=new Set((d.patch.sheets||[]).map(x=>x.id));const next={...state,sheets:state.sheets.map(x=>touched.has(x.id)?structuredClone(x):x)};for(const k of Object.keys(d.patch.props||{}))if(next[k]&&typeof next[k]==='object')next[k]=structuredClone(next[k]);applyPatch(next,d.patch);state=next;revision=d.revision;}catch{return liveCatchUp();}
+ renderPreservingFocus();showLiveNote(d);
+}
+function showLiveNote(d){const el=$('#save-status');if(!el||!d.by)return;el.classList.add('live-note');if(el.lastChild)el.lastChild.textContent=' Updated by '+d.by;clearTimeout(showLiveNote.t);showLiveNote.t=setTimeout(()=>{el.classList.remove('live-note');setSaveStatus();},4000);}
+function startLive(){if(!window.EventSource)return;const es=new EventSource('/api/events');
+ es.addEventListener('hello',e=>{liveOK=true;const d=JSON.parse(e.data);livePresence=d.presence||[];paintPresence();if(d.revision>revision&&!editQueue.pending&&!saving)liveCatchUp();sendPresence(true);});
+ es.addEventListener('change',e=>{try{applyLiveChange(JSON.parse(e.data));}catch{}});
+ es.addEventListener('presence',e=>{try{livePresence=JSON.parse(e.data);paintPresence();}catch{}});
+ es.onerror=()=>{liveOK=false;};}
+function presencePayload(){return {sheetId:page==='sheet'?sheetId:null,rowId:activeCell?.sheetId===sheetId?activeCell.rowId:null,colId:activeCell?.sheetId===sheetId?activeCell.colId:null,editing:document.activeElement?.dataset?.editing==='true'};}
+function sendPresence(force=false){const body=JSON.stringify(presencePayload());if(!force&&body===presenceSent)return;presenceSent=body;fetch('/api/presence',{method:'POST',headers:{'Content-Type':'application/json','X-Sheets-Tester':testerName,'X-Sheets-Client':clientId},body,keepalive:true}).catch(()=>{});}
+function queuePresence(){clearTimeout(presenceTimer);presenceTimer=setTimeout(()=>sendPresence(),400);}
+function paintPresence(){
+ const others=livePresence.filter(p=>p.client!==clientId);
+ const here=others.filter(p=>p.sheetId&&p.sheetId===sheetId&&page==='sheet');
+ document.querySelectorAll('.peer-badges').forEach(el=>el.remove());document.querySelectorAll('tr.peer-row').forEach(tr=>tr.classList.remove('peer-row'));document.querySelectorAll('td.peer-cell').forEach(td=>{td.classList.remove('peer-cell');td.removeAttribute('data-peer');});
+ const head=$('.sheet-heading .heading-actions');
+ if(head&&here.length){const names=[...new Map(here.map(p=>[p.name,p])).values()];head.insertAdjacentHTML('afterbegin',`<div class="peer-badges" role="status" aria-label="${esc(names.map(p=>p.name).join(', '))} also here">${names.slice(0,4).map(p=>`<span class="peer-badge" title="${esc(p.name)}${p.editing?' (editing)':' (viewing)'}">${esc(initials(p.name))}</span>`).join('')}${names.length>4?`<span class="peer-badge more">+${names.length-4}</span>`:''}</div>`);}
+ for(const p of here){if(!p.rowId)continue;const tr=document.querySelector(`input.row-check[data-row="${CSS.escape(p.rowId)}"]`)?.closest('tr');if(!tr)continue;tr.classList.add('peer-row');const num=tr.querySelector('.row-num');if(num&&!num.querySelector('.peer-badges'))num.insertAdjacentHTML('beforeend',`<span class="peer-badges inline"><span class="peer-badge small" title="${esc(p.name)}">${esc(initials(p.name))}</span></span>`);if(p.colId){const td=tr.querySelector(`td[data-grid-col="${CSS.escape(p.colId)}"]`);if(td){td.classList.add('peer-cell');td.dataset.peer=p.name+(p.editing?' is editing':'');}}}
+}
+document.addEventListener('focusin',queuePresence);document.addEventListener('click',queuePresence);window.addEventListener('hashchange',queuePresence);
+setInterval(()=>{if(liveOK&&!document.hidden)sendPresence(true);},25000);
+window.addEventListener('pagehide',()=>{fetch('/api/presence',{method:'POST',headers:{'Content-Type':'application/json','X-Sheets-Tester':testerName,'X-Sheets-Client':clientId},body:'{"leave":true}',keepalive:true}).catch(()=>{});});
+startLive();

@@ -446,3 +446,12 @@ body.filling,body.filling *{cursor:crosshair!important;user-select:none}
 .page-sheet .command-popover .sheet-menu-item:hover{background:var(--ui-hover)}
 .page-sheet .command-popover>button{min-height:32px;padding:6px 10px;border-radius:5px;font-size:12.5px}
 .page-sheet .command-popover>button:hover{background:var(--ui-hover)}
+/* v0.11 presence (monochrome) */
+.peer-badges{display:inline-flex;align-items:center;margin-right:8px}
+.peer-badge{width:26px;height:26px;border-radius:50%;background:#1d1d1f;color:#fff;font-size:10.5px;font-weight:600;line-height:22px;text-align:center;border:2px solid #fff;margin-left:-6px;box-sizing:border-box}
+.peer-badge:first-child{margin-left:0}.peer-badge.more{background:#6b6b70}
+.peer-badges.inline{position:absolute;right:2px;top:50%;transform:translateY(-50%);margin:0}
+.peer-badge.small{width:16px;height:16px;font-size:8px;line-height:14px;border-width:1px}
+tr.peer-row td.row-num{box-shadow:inset 3px 0 0 #1d1d1f}
+td.peer-cell{outline:2px dashed #6b6b70;outline-offset:-2px}
+#save-status.live-note{color:var(--ui-ink);font-weight:600}
