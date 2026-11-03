@@ -29,7 +29,7 @@ let selectionKind='cells',copiedStructure=null,lockCycleUntil=0;
 let sheetZoom=Math.max(50,Math.min(150,Number(localStorage.getItem('sheets-grid-zoom'))||100));
 let sheetWrap=localStorage.getItem('sheets-grid-wrap')==='true';
 let cellRange=null,rangeDrag=null,columnDrag=null;
-let buildInfo={version:'0.9.1',build:'unknown'};
+let buildInfo={version:'0.10.0',build:'unknown'};
 
 let state,revision,workspaceId,sheetId,page='home',view='Table',query='',statusFilter='',sortCol='',sortDir=1,saving=false,selected=new Set(),collapsed=new Set(),month=new Date(),calc;
 const app=$('#app'),dialog=$('#dialog');let submitHandler;
