@@ -604,3 +604,8 @@ dialog.wide-dialog.preview-dialog{max-width:min(1000px,calc(100vw - 24px))}
 .m-card button{justify-items:stretch;justify-content:stretch;align-content:start;text-align:left}
 .m-card dl,.m-card .m-title,.m-card .m-meta,.m-card .m-thumbs{width:100%;justify-self:stretch}
 @media (max-width:640px){.app-rail>:not(button):not(a):not(nav){display:none!important}.app-rail{gap:0}.app-rail>button,.app-rail>a{flex:1}}
+/* v0.11 folder imports */
+.imp-card{border:1px solid var(--ui-line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.imp-card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.imp-card header small{display:block;color:var(--ui-muted);font-size:12px;margin-top:2px}
+.imp-runs{margin:10px 0 0;padding-left:18px;font-size:12.5px;display:grid;gap:4px}.imp-runs time{color:var(--ui-muted);margin-right:6px}
+.imp-err{font-weight:600;text-decoration:underline dotted}
