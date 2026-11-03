@@ -31,3 +31,16 @@ function clipboardValue(c,value){
  if(c.type==='date'){const m=v.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)v=m[3]+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}
  return v;
 }
+
+// Builds what goes on the system clipboard for a copied range. External apps (Excel, Numbers, Sheets)
+// receive computed display values as TSV plus an HTML table; formulas stay internal (`raw`) so that
+// pasting inside this app can translate them relative to the destination.
+export function clipboardPayload(rows,columns,displayValue,rawValue){
+ const values=rows.map(r=>columns.map(c=>String(displayValue(r,c)??'')));
+ const raw=rows.map(r=>columns.map(c=>{const v=rawValue(r,c);return typeof v==='string'&&v.startsWith('=')?v:null;}));
+ const esc=v=>v.replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])).replace(/\r?\n/g,'<br>');
+ const html='<meta charset="utf-8"><table>'+values.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</table>';
+ return {text:encodeTSV(values),html,raw,values};
+}
+// For an internal paste: formulas from the source range, translated; plain values elsewhere.
+export function internalPasteMatrix(payload,translate){return payload.values.map((row,i)=>row.map((v,j)=>payload.raw[i][j]!=null?translate(payload.raw[i][j]):v));}

@@ -211,3 +211,104 @@ dialog.formula-drawer::backdrop,dialog.rules-drawer::backdrop{background:#000000
 .formula-preview small{display:block;margin-top:8px;color:#555;font-size:11px}
 
 .inline-formula-help{position:fixed;z-index:80;width:min(420px,90vw);background:white;border:1px solid #ccc;border-radius:6px;box-shadow:0 7px 24px #0002;padding:10px;font-size:12px}.inline-formula-help button{display:block;width:100%;text-align:left;border:0;padding:8px 5px;white-space:normal}.inline-formula-help small{display:block;color:#666;margin-top:8px}
+
+/* ---- Add-column corner (far left of the header strip, sticky on both axes) ---- */
+.page-sheet .grid th.add-column-corner{padding:0;z-index:9}
+.page-sheet .grid .add-column-button{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:34px;padding:0;border:0;border-radius:0;background:transparent;color:#222;cursor:pointer}
+.page-sheet .grid .add-column-button .icon{width:16px;height:16px;stroke-width:2.2}
+.page-sheet .grid .add-column-button:hover{background:#e4e4e6;color:#000}
+.page-sheet .grid .add-column-button:active{background:#d6d6d9}
+.page-sheet .grid .add-column-button:focus-visible{outline:2px solid #222;outline-offset:-3px}
+.page-sheet .grid th.row-num #select-all{margin:0;vertical-align:middle;cursor:pointer}
+.page-sheet .grid .column-icon{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 2px;border-radius:3px;background:#e6e6e8;color:#444;font-size:10px;font-weight:600;line-height:1;opacity:1}
+
+/* ---- Column editor ---- */
+dialog.column-inspector .column-editor-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;align-items:end}
+dialog.column-inspector .column-type-hint{min-height:18px;margin:6px 0 12px;color:#666}
+dialog.column-inspector .column-section[hidden]{display:none}
+dialog.column-inspector .column-more{margin:10px 0;border:1px solid #e3e3e5;border-radius:6px;padding:0 12px}
+dialog.column-inspector .column-more>summary{cursor:pointer;padding:10px 0;font-weight:600;color:#333}
+dialog.column-inspector .column-more[open]>summary{border-bottom:1px solid #eee;margin-bottom:10px}
+dialog.column-inspector .column-editor-actions{margin-top:14px;padding-top:12px;border-top:1px solid #eee}
+@media(max-width:560px){dialog.column-inspector .column-editor-grid{grid-template-columns:1fr}}
+.app-select-menu .app-select-group{padding:8px 10px 4px;font-size:11px;font-weight:600;letter-spacing:.02em;color:#777;text-transform:uppercase;pointer-events:none}
+
+/* ---- Formula reference picking ---- */
+body.formula-picking .page-sheet .grid td[data-grid-row],body.formula-picking .page-sheet .grid th[data-grid-col]{cursor:cell}
+.page-sheet .grid .formula-ref-pick{outline:2px dashed #333;outline-offset:-3px}
+dialog.formula-drawer:not(:modal){z-index:70;box-shadow:-12px 0 32px #0000001f}
+.formula-pick-hint{margin:8px 0 0}
+
+/* =====================================================================
+   UI pass (Nov 2026): compact chrome, consistent controls, focus states.
+   Monochrome only: neutral grays and charcoal. Cell colors are untouched.
+   ===================================================================== */
+:root{--ui-ink:#1d1d1f;--ui-muted:#6b6b70;--ui-line:#e2e2e5;--ui-hover:#ececee;--ui-press:#dedee1;--ui-focus:#2b2b2e;--ui-radius:6px}
+
+/* Compact sheet heading + toolbar: more rows visible on laptop screens */
+.page-sheet .sheet-heading{min-height:52px;padding:8px 20px;gap:16px;background:#f7f7f8;border-bottom:1px solid var(--ui-line)}
+.page-sheet .sheet-heading h1{font-size:18px;line-height:24px;letter-spacing:-.2px}
+.page-sheet .heading-actions{gap:6px}
+.page-sheet .heading-actions button{height:32px;padding:0 12px;font-size:12px;border-radius:var(--ui-radius)}
+.page-sheet .sheet-commandbar{height:44px;min-height:44px;padding:4px 12px;gap:2px;border-bottom:1px solid #d9d9dc}
+.page-sheet .sheet-commandbar>button,.page-sheet .sheet-commandbar>details>summary{height:32px;min-height:32px;padding:0 10px;border-radius:var(--ui-radius);color:var(--ui-ink)}
+.page-sheet .sheet-commandbar>details{height:32px;min-height:32px}
+.page-sheet .sheet-commandbar>button:active,.page-sheet .sheet-commandbar>details>summary:active{background:var(--ui-press)}
+.page-sheet .sheet-commandbar .command-divider{width:1px;height:20px;margin:0 6px;background:var(--ui-line)}
+.page-sheet .command-popover{top:calc(100% + 6px);border-color:var(--ui-line);box-shadow:0 10px 28px #00000024}
+
+/* Consistent keyboard focus: one charcoal ring everywhere in sheet chrome */
+.page-sheet .sheet-commandbar>button:focus-visible,.page-sheet .sheet-commandbar>details>summary:focus-visible,.page-sheet .heading-actions button:focus-visible,.page-sheet .grid-pagination button:focus-visible,.grid-context-menu button:focus-visible,.format-tool:focus-visible{outline:2px solid var(--ui-focus);outline-offset:1px}
+.grid-context-menu button:focus{background:var(--ui-hover)}
+
+/* Row tools: show only when a row has items, on hover, or on keyboard focus */
+.page-sheet .grid .row-tool:not(.has-items):not(.is-locked){opacity:0}
+.page-sheet .grid tr:hover .row-tool,.page-sheet .grid tr:focus-within .row-tool,.page-sheet .grid .row-tool:focus-visible{opacity:1}
+
+/* Grid density and selection */
+.page-sheet .grid td.range-selected{background-image:linear-gradient(#1d1d1f14,#1d1d1f14)}
+.page-sheet .grid td:focus{outline:2px solid var(--ui-focus);outline-offset:-2px}
+.page-sheet .grid th[data-grid-col]>button[data-action="select-column"]:hover{background:#ebebed}
+.page-sheet .grid .column-menu-trigger{opacity:.55}
+.page-sheet .grid th:hover .column-menu-trigger,.page-sheet .grid .column-menu-trigger:focus-visible,.page-sheet .grid .column-menu-trigger[aria-expanded="true"]{opacity:1}
+
+/* Context menus */
+.grid-context-menu{border-color:var(--ui-line);border-radius:8px;padding:5px}
+.grid-context-menu button{min-height:30px;padding:7px 12px;font-size:12.5px;color:var(--ui-ink)}
+.grid-context-menu hr{border:0;border-top:1px solid var(--ui-line);margin:5px 4px}
+.grid-context-menu .context-menu-title{padding:6px 12px 4px;font-size:11px;font-weight:600;color:var(--ui-muted);text-transform:none}
+
+/* Format popover: labeled groups */
+.page-sheet .command-format .command-popover{width:360px;padding:12px 14px}
+.page-sheet .command-popover .format-toolbar{display:grid;gap:10px;background:transparent}
+.page-sheet .format-section{display:grid;grid-template-columns:62px 1fr;align-items:center;gap:8px}
+.page-sheet .format-label{font-size:11px;font-weight:600;color:var(--ui-muted)}
+.page-sheet .command-popover .format-toolbar .format-tool{height:30px;min-width:30px;padding:0 9px;border:1px solid var(--ui-line);border-radius:5px;background:#fff;font-size:12px;color:var(--ui-ink);display:inline-flex;align-items:center;gap:5px}
+.page-sheet .command-popover .format-toolbar .format-tool:hover{background:var(--ui-hover)}
+.page-sheet .command-popover .format-toolbar .format-tool[aria-pressed="true"]{background:var(--ui-ink);border-color:var(--ui-ink);color:#fff}
+.page-sheet .format-swatch{display:inline-block;width:10px;height:3px;background:currentColor;border-radius:1px;margin-left:1px;align-self:flex-end;margin-bottom:8px}
+.page-sheet .format-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid var(--ui-line)}
+.page-sheet .format-foot .selection-caption{font-size:11px;color:var(--ui-muted)}
+
+/* Drawers: footer pinned to the bottom edge */
+dialog.formula-drawer[open],dialog.rules-drawer[open]{display:flex;flex-direction:column}
+dialog.formula-drawer>form,dialog.rules-drawer>form{flex:1;min-height:0}
+
+/* Footer / pagination */
+.page-sheet .grid-pagination{gap:8px}
+.page-sheet .grid-pagination button{height:28px;border-radius:5px}
+
+/* Narrow windows: wrap the command bar instead of clipping commands */
+@media(max-width:760px){
+ .page-sheet .sheet-heading{min-height:48px;padding:8px 12px}
+ .page-sheet .sheet-heading h1{font-size:16px;white-space:nowrap}
+ .page-sheet .heading-actions button[data-action="budget-review"],.page-sheet .heading-actions button[data-action="export-menu"]{display:none}
+ .page-sheet .sheet-commandbar{height:auto;min-height:44px;flex-wrap:wrap;row-gap:2px;padding:4px 8px}
+ .page-sheet .sheet-commandbar .tab-spacer{display:none}
+ .page-sheet .command-format .command-popover{position:absolute;right:auto;left:0;top:calc(100% + 6px);width:min(340px,calc(100vw - 72px))}
+}
+dialog.formula-drawer .modal-body,dialog.rules-drawer .modal-body{max-height:none;flex:1 1 auto}
+.page-sheet .format-foot .format-tool{white-space:nowrap}
+.formula-readable{margin-top:10px;padding-top:8px;border-top:1px solid #e6e6e8}
+.formula-readable span{display:block;font-size:11px;font-weight:600;color:#6b6b70;margin-bottom:3px}
+.formula-readable code{display:block;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#1d1d1f;white-space:pre-wrap;word-break:break-word}

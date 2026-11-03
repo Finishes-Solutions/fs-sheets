@@ -25,3 +25,13 @@ Copy/paste of selected columns duplicates editable column properties without dat
 This is broad regression coverage, not an exhaustive certification of every browser, input device, or application page. Operating-system-reserved keys may never reach the app (notably Command+Space). The supplied reference does not specify keys for clear formatting, insert comment or duplicate sheet; these remain menu actions rather than guessed bindings.
 
 Undo and redo now persist up to 50 steps in SQLite, with atomic transitions, revision checks and session ownership. See HISTORY-WORKFLOW.md for budget-copy verification. Cross-sheet row structure paste is rejected; ordinary cell paste is available. The advanced-search shortcut opens the existing workspace search, and Manage References opens the formula/reference editor. Hierarchy controls collapse/expand all for a column or one descendant level per press for selected rows. Native OS bullet-character entry remains available. Local accounts, access controls and concurrent-edit merging remain outside this update.
+
+## Update — v0.7.0
+
+- **＋ (far left of the column headers)**: add a column. Reachable with Tab; Enter or Space opens the editor. Arrow keys choose the type; Enter adds it.
+- **While editing a formula** (a cell value starting with `=`, or the ƒx Formulas drawer): click a cell to insert `[Column]@row` (same row) or `[Column]N`. Shift-click extends the last reference into a range; clicking a column title inserts `[Column]:[Column]`.
+- Enter or Space on a focused column-header button now activates it (select column, column menu, ＋) instead of moving the grid selection. Column menus opened by keyboard stay open, and arrow keys move one item at a time.
+- Shift-click extends a cell range again, including on cells with inline editors.
+- After Enter or Tab, the cursor moves immediately; the save continues in the background ("Saving…").
+
+See [UX-REVIEW-2026-11.md](UX-REVIEW-2026-11.md) for verification details.

@@ -26,3 +26,7 @@ UI mutation tests ran only on a SQLite backup of the complete budget database at
 The live budget object, including every row, formula, column and source-audit field, matches the pre-work backup exactly. A concurrent edit to a separate schedule sheet was preserved. See budget-data-preservation.json for the comparison hash.
 
 These tests establish the listed workflows, not exact parity with every Smartsheet interaction or every browser/OS shortcut. OS-reserved key combinations may be intercepted before reaching the application. The application remains a local workspace with session-protected history, not authenticated multi-user collaboration.
+
+## Update — v0.7.0 save queue
+
+Edits now display immediately and save through a strictly serialized queue (`public/edit-queue.mjs`). Each save is rebuilt on the newest server-confirmed workspace, so revision checks, lock enforcement, metadata and workflows behave as before. Undo and redo wait for earlier saves; their results become the confirmed base for any edits queued after them. A rejected save is removed from the display; a 409 conflict stops the queue and shows the existing draft/reload banner. Server-side history semantics (50 persistent steps, session ownership, redo invalidation) are unchanged and covered by `test/history.test.mjs` and `test/save-path.test.mjs`. See [UX-REVIEW-2026-11.md](UX-REVIEW-2026-11.md).

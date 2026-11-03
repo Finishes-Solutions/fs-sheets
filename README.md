@@ -126,3 +126,7 @@ Create a scenario to model cell changes, percentage or fixed cost adjustments, a
 DataTables and Dynamic View start with source-sheet cards. Saved views have search and 50-row pagination. Renaming a DataTable preserves ingested records and connections. Source refresh remains explicit; Dynamic View edits continue through server-enforced field rules.
 
 Reports include live per-sheet presets, cross-sheet field mapping, conditions, grouping, sorting, and 100-row UI pages. **Export PDF** downloads a real PDF with selectable text, report metadata, optional summary and notes, repeated table headers, row numbers and page totals. Choose Letter/A4 and portrait/landscape, or uncheck detailed rows for a concise group summary. All matching rows and selected columns are exported, independent of UI pagination. Wide tables use additional column sections with the first column repeated; very long cells continue across pages. Files embed bundled DejaVu fonts (see `assets/fonts/LICENSE-DejaVu.txt`). CSV remains available separately.
+
+## 0.7 — sheet UX and save speed
+
+A **＋** at the far left of the column headers adds columns with a grouped type picker and insertion position. Edits appear immediately and save in an ordered background queue; on the 11,444-row budget, Enter moves to the next cell in about 60 ms instead of 1.8 s. Formulas can be built by clicking grid cells. Copying to Excel carries values, not internal formula syntax. Details, measurements and remaining limits: [docs/UX-REVIEW-2026-11.md](docs/UX-REVIEW-2026-11.md).
