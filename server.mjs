@@ -19,6 +19,7 @@ import {diffState,applyPatch,historyPatch,isEmptyPatch} from './lib/state-patch.
 import {buildWorkbookSpec} from './lib/excel-export.mjs';
 import {API_BASES,smartsheetGet,convertSheets,verifyFormulas,fetchAttachments} from './lib/smartsheet-import.mjs';
 import {ensureSchema,readStored,packState,writePacked,migrateToSheetStore} from './lib/store.mjs';
+import {convertLegacyHistory,compactIfMostlyEmpty} from './lib/compact-history.mjs';
 import {acquireLock} from './lib/instance-lock.mjs';
 import {createLive} from './lib/live.mjs';
 import {parseCSV,applyImport} from './lib/folder-import.mjs';
@@ -50,6 +51,7 @@ db.exec("CREATE TABLE IF NOT EXISTS outbox (id INTEGER PRIMARY KEY AUTOINCREMENT
 const backupRoot=process.env.SHEETS_BACKUP_DIR||(process.env.DB_PATH?path.join(path.dirname(dbPath),'backups'):path.join(root,'backups'));
 const versions=createVersionStore(path.join(backupRoot,'versions'));
 {const m=await migrateToSheetStore(db,{backupRoot:freshWorkspace?null:backupRoot});if(m.migrated)console.log(`Converted storage to one row per sheet (${m.sheets} sheets). Backup: ${m.backupFile}`);}
+try{const h=convertLegacyHistory(db,readStored(db).body);if(h.converted){console.log(`Shrank ${h.converted} old undo steps from ${Math.round(h.before/1048576)} MB to ${Math.max(1,Math.round(h.after/1048576))} MB (undo still works the same).`);}const c=compactIfMostlyEmpty(db);if(c.compacted)console.log(`Database compacted: ${Math.round(c.from/1048576)} MB → ${Math.round(c.to/1048576)} MB.`);}catch(e){console.warn('Undo history was left as it was: '+e.message);}
 let rawCache=null,parsedCache=null;
 // Sheets already validated and saved. Saved state objects are treated as read-only (see the patch fast path),
 // so a sheet object that passed validation once never needs its rows re-checked.
