@@ -89,3 +89,32 @@ export function findReplacePlan(cells,opts){
   changes.push({row:c.row,column:c.column,value:m.replace(text,opts.replace)});}
  return {matches,changes,skipped};
 }
+
+// ---- Row heights for the virtual grid ----
+// Remembers the measured height of every row that has been on screen; rows not yet seen use the
+// average of measured rows. Offsets are prefix sums, so wrapped (tall) rows scroll accurately.
+export function createHeightIndex(fallback=29){
+ const heights=new Map();let version=0,sum=0,cache=null,frozen=null;
+ // The estimate for unseen rows is fixed once enough rows are measured, so measuring more rows
+ // never moves the rows already on screen.
+ const average=()=>frozen??(heights.size?sum/heights.size:fallback);
+ const offsets=rows=>{
+  if(cache&&cache.rows===rows&&cache.version===version)return cache.offsets;
+  const avg=average(),out=new Float64Array(rows.length+1);
+  for(let i=0;i<rows.length;i++){const h=heights.get(rows[i].id);out[i+1]=out[i]+(h===undefined?avg:h);}
+  cache={rows,version,offsets:out};return out;
+ };
+ return {
+  // Returns true when anything changed (by more than half a pixel).
+  set(id,h){if(!(h>4))return false;const old=heights.get(id);if(old!==undefined&&Math.abs(old-h)<=0.5)return false;heights.set(id,h);sum+=h-(old??0);version++;return true;},
+  clear(){heights.clear();sum=0;frozen=null;version++;},
+  freeze(min=20){if(frozen===null&&heights.size>=min){frozen=sum/heights.size;version++;}},
+  average,
+  offsets,
+  top:(rows,i)=>offsets(rows)[Math.max(0,Math.min(rows.length,i))],
+  total:rows=>offsets(rows)[rows.length],
+  // Index of the row containing y (row-space pixels).
+  indexAt(rows,y){const o=offsets(rows);if(!rows.length)return 0;let lo=0,hi=rows.length-1;while(lo<hi){const mid=(lo+hi+1)>>1;if(o[mid]<=y)lo=mid;else hi=mid-1;}return lo;},
+  get size(){return heights.size;}
+ };
+}

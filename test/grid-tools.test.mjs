@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {selectionStats,fillSeries,moveRows,findReplacePlan,indentRows,outdentRows} from '../public/grid-tools.mjs';
+import {selectionStats,fillSeries,moveRows,findReplacePlan,indentRows,outdentRows,createHeightIndex} from '../public/grid-tools.mjs';
 import {translateFormula} from '../lib/formulas.mjs';
 
 test('selection statistics count numbers only and avoid float noise',()=>{
@@ -79,4 +79,25 @@ test('outdenting a block of siblings keeps them siblings; top-level rows are ski
   const rows2=tree([['A',null],['A1','A'],['A2','A'],['A3','A']]);
   outdentRows(rows2,['A1','A2']);
   assert.equal(shape(rows2),'A A1 A2 A3<A2');
+});
+
+test('height index: measured rows keep their own height and unmeasured rows use the average', async () => {
+  const {createHeightIndex}=await import('../public/grid-tools.mjs');
+  const rows=Array.from({length:6},(_,i)=>({id:'r'+i}));const hi=createHeightIndex(30);
+  assert.equal(hi.total(rows),180);
+  assert.ok(hi.set('r1',120));assert.ok(hi.set('r2',20));assert.equal(hi.set('r2',20.3),false);
+  assert.equal(hi.average(),70);
+  assert.deepEqual([...hi.offsets(rows)],[0,70,190,210,280,350,420]);
+  assert.equal(hi.indexAt(rows,0),0);assert.equal(hi.indexAt(rows,69),0);assert.equal(hi.indexAt(rows,70),1);assert.equal(hi.indexAt(rows,189),1);assert.equal(hi.indexAt(rows,190),2);assert.equal(hi.indexAt(rows,10000),5);
+  assert.equal(hi.top(rows,3),210);
+});
+
+test('height index: estimate for unseen rows stays fixed after freezing', async () => {
+  const {createHeightIndex}=await import('../public/grid-tools.mjs');
+  const rows=Array.from({length:100},(_,i)=>({id:'r'+i}));const hi=createHeightIndex(30);
+  for(let i=0;i<20;i++)hi.set('r'+i,40);hi.freeze();
+  const before=hi.top(rows,90)-hi.top(rows,50);
+  for(let i=50;i<60;i++)hi.set('r'+i,200);
+  assert.equal(hi.top(rows,50),20*40+30*40,'rows above the window did not move');
+  assert.equal(hi.top(rows,90)-hi.top(rows,60),before-10*40);
 });
