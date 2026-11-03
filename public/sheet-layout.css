@@ -609,3 +609,26 @@ dialog.wide-dialog.preview-dialog{max-width:min(1000px,calc(100vw - 24px))}
 .imp-card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.imp-card header small{display:block;color:var(--ui-muted);font-size:12px;margin-top:2px}
 .imp-runs{margin:10px 0 0;padding-left:18px;font-size:12.5px;display:grid;gap:4px}.imp-runs time{color:var(--ui-muted);margin-right:6px}
 .imp-err{font-weight:600;text-decoration:underline dotted}
+/* Active sheet search: keep the term visible after the popover closes */
+.command-search.is-active>summary{background:#ececee;border-radius:7px;color:#1d1d1f;gap:4px;padding:0 8px}
+.command-search .search-chip{font-size:12px;font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty-inline button{margin-left:8px}
+/* Phones: the card list is the scrolling area (the page itself is fixed-height on sheet pages). */
+@media (max-width:640px){#content.page-sheet .mobile-cards{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}}
+/* Phones: the rail's Workspace button opens the sidebar as a full-screen menu. */
+.phone-nav-close{display:none}
+@media (max-width:640px){
+ #app.phone-nav-open>.sidebar{display:block!important;position:fixed!important;inset:0 0 60px 0;width:100vw!important;min-width:0!important;max-width:none!important;height:auto!important;z-index:85;background:#fff;overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 16px 24px!important;border:0!important;box-shadow:none}
+ #app.phone-nav-open>.sidebar .phone-nav-close{display:grid;place-items:center;position:fixed;top:12px;right:12px;width:44px;height:44px;margin:0;border:1px solid #e2e2e4;border-radius:22px;background:#fff;color:#2c2c2e;font-size:24px;line-height:1;z-index:2}
+ #app.phone-nav-open>.sidebar .brand{font-size:17px}
+ #app.phone-nav-open>.sidebar .nav-item,#app.phone-nav-open>.sidebar .nav-sheet{min-height:44px;height:auto}
+ #app.phone-nav-open>.sidebar nav,#app.phone-nav-open>.sidebar .sheet-tree{display:block;height:auto!important;max-height:none!important;overflow:visible!important;flex:none}
+ #app.phone-nav-open>.sidebar .sidebar-bottom{position:static!important;margin-top:16px}
+ body:has(#app.phone-nav-open){overflow:hidden}
+}
+/* Row panel: a coworker changed the row while you were typing. */
+.panel-stale{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 14px 0;padding:8px 10px;border:1px solid #d9d9dc;border-radius:8px;background:#f4f4f5;color:#3a3a3c;font-size:12px}
+.panel-stale .text-button{margin:0;font-size:12px;font-weight:600;color:#1d1d1f;text-decoration:underline;padding:2px 4px;height:auto}
+/* Thumbnails waiting to be generated. */
+img.thumb-pending{background:#ececee}
+.timeline-note .text-button{margin:0;padding:0 2px;font-size:inherit;color:#1d1d1f;text-decoration:underline;height:auto}

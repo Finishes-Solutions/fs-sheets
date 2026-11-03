@@ -33,7 +33,8 @@ test('emails respect each person\'s address and preferences; digest groups unrea
 test('SMTP client sends through a server with AUTH LOGIN', async () => {
   const smtp=await fakeSmtp();
   try{
-    const cfg=smtpConfig({SMTP_HOST:'127.0.0.1',SMTP_PORT:String(smtp.port),SMTP_USER:'bot',SMTP_PASS:'secret',SMTP_FROM:'Sheets <sheets@example.com>',SMTP_SECURE:'0'});
+    const cfg=smtpConfig({SMTP_HOST:'127.0.0.1',SMTP_PORT:String(smtp.port),SMTP_USER:'bot',SMTP_PASS:'secret',SMTP_FROM:'Sheets <sheets@example.com>',SMTP_SECURE:'0',SMTP_ALLOW_PLAIN:'1'});
+    await assert.rejects(sendMail({...cfg,allowPlain:false},{to:'pat@example.com',subject:'x',text:'y'}),/did not offer an encrypted connection/,'password is never sent unencrypted by default');
     await sendMail(cfg,{to:'pat@example.com',subject:'Hello — résumé',text:'Line one\n.\nend',html:'<p>x</p>'});
     assert.equal(smtp.messages.length,1);assert.equal(smtp.messages[0].to,'pat@example.com');
     assert.equal(smtp.text(smtp.messages[0]),'Line one\n.\nend');
@@ -44,7 +45,7 @@ test('SMTP client sends through a server with AUTH LOGIN', async () => {
 
 test('server: a mention emails the person; watching a row emails on changes', async () => {
   const smtp=await fakeSmtp(),dir=await mkdtemp(path.join(os.tmpdir(),'notify-')),port=String(45000+Math.floor(Math.random()*900));
-  const p=spawn(process.execPath,['server.mjs'],{env:{...process.env,PORT:port,DB_PATH:path.join(dir,'x.sqlite'),SHEETS_AUTO_BACKUP:'0',SMTP_HOST:'127.0.0.1',SMTP_PORT:String(smtp.port),SMTP_USER:'bot',SMTP_PASS:'secret',SMTP_FROM:'sheets@example.com',SMTP_SECURE:'0',SHEETS_DIGEST_HOUR:'99'},stdio:['ignore','pipe','pipe']});
+  const p=spawn(process.execPath,['server.mjs'],{env:{...process.env,PORT:port,DB_PATH:path.join(dir,'x.sqlite'),SHEETS_AUTO_BACKUP:'0',SMTP_HOST:'127.0.0.1',SMTP_PORT:String(smtp.port),SMTP_USER:'bot',SMTP_PASS:'secret',SMTP_FROM:'sheets@example.com',SMTP_SECURE:'0',SMTP_ALLOW_PLAIN:'1',SHEETS_DIGEST_HOUR:'99'},stdio:['ignore','pipe','pipe']});
   try{
     await new Promise((ok,bad)=>{p.stdout.on('data',b=>{if(String(b).includes('ready'))ok();});p.on('exit',c=>bad(Error('exit '+c)));});
     const api=async(route,body,who='Lee')=>{const r=await fetch(`http://127.0.0.1:${port}/api/${route}`,body?{method:'POST',headers:{'Content-Type':'application/json','X-Sheets-Tester':who},body:JSON.stringify(body)}:{});return {status:r.status,...await r.json()};};
