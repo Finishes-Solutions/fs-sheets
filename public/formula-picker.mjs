@@ -39,3 +39,9 @@ export function readableFormula(formula,sheet){
  const cols=new Map(sheet.columns.map(c=>[c.id,c.name])),rows=new Map(sheet.rows.map((r,i)=>[r.id,i+1]));
  return formula.replace(/CELLREF\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/g,(m,row,col)=>{const name=cols.get(col);if(!name)return m;if(row==='@row')return '['+name+']@row';const n=rows.get(row);return n?'['+name+']'+n:m;});
 }
+
+// Excel-style "point mode": arrow keys pick cells only when the caret directly follows an operator,
+// "(", "," or "=" — elsewhere arrows keep moving the caret inside the formula text.
+export function canPointAt(text,start,end){return typeof text==='string'&&start===end&&isFormulaText(text)&&/[=+\-*/^&(,:<>]\s*$/.test(text.slice(0,start));}
+// Moves a point-mode cursor by one arrow key within grid bounds.
+export function movePoint(cursor,key,rows,cols){const d={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[key]||[0,0];return {ri:Math.max(0,Math.min(rows-1,cursor.ri+d[0])),ci:Math.max(0,Math.min(cols-1,cursor.ci+d[1]))};}

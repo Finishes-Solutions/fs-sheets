@@ -312,3 +312,12 @@ dialog.formula-drawer .modal-body,dialog.rules-drawer .modal-body{max-height:non
 .formula-readable{margin-top:10px;padding-top:8px;border-top:1px solid #e6e6e8}
 .formula-readable span{display:block;font-size:11px;font-weight:600;color:#6b6b70;margin-bottom:3px}
 .formula-readable code{display:block;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#1d1d1f;white-space:pre-wrap;word-break:break-word}
+
+/* ---- Virtualized grid ---- */
+.page-sheet .grid tr.grid-spacer td{padding:0;border:0;background:transparent;pointer-events:none}
+.page-sheet .grid:focus{outline:none}
+#grid-range-label{color:#555;font-variant-numeric:tabular-nums}
+
+/* Formula drawer sits beside the sheet (not over it) so any column can be clicked to insert a reference */
+@media(min-width:900px){body.formula-drawer-open #app>main{margin-right:min(520px,45vw);transition:margin-right .12s ease}
+ body.formula-drawer-open dialog.formula-drawer{width:min(520px,45vw)}}

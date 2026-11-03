@@ -130,3 +130,7 @@ Reports include live per-sheet presets, cross-sheet field mapping, conditions, g
 ## 0.7 — sheet UX and save speed
 
 A **＋** at the far left of the column headers adds columns with a grouped type picker and insertion position. Edits appear immediately and save in an ordered background queue; on the 11,444-row budget, Enter moves to the next cell in about 60 ms instead of 1.8 s. Formulas can be built by clicking grid cells. Copying to Excel carries values, not internal formula syntax. Details, measurements and remaining limits: [docs/UX-REVIEW-2026-11.md](docs/UX-REVIEW-2026-11.md).
+
+## 0.8 — patch saves, merging tabs, continuous scrolling
+
+Saves send only changed cells and fields; undo history stores small reverse patches. Edits from two tabs to different cells merge, and only true same-cell conflicts are blocked. The grid scrolls continuously instead of paging 50 rows at a time, arrow keys can pick formula references, and the formula drawer sits beside the sheet. See [docs/UX-REVIEW-2026-11.md](docs/UX-REVIEW-2026-11.md) §6.

@@ -15,7 +15,7 @@ export function createEditQueue({getState,setState,send,clone=structuredClone,ne
   if(conflict){drop(op);rebuild();return false;}
   const next=clone(confirmed);
   try{apply(op,next);}catch(e){drop(op);rebuild();throw e;}
-  try{const saved=await send(next,op.label);confirmed=saved;drop(op);rebuild();return true;}
+  try{const saved=await send(next,op.label,confirmed);confirmed=saved;drop(op);rebuild();return true;}
   catch(e){if(e.status===409){conflict=next;onConflict(next,e);}drop(op);rebuild();onError(e);return false;}
  }
  return {

@@ -38,3 +38,10 @@ test('imported CELLREF formulas read with column names without changing the stor
  assert.equal(readableFormula('=CELLREF("gone","q-id")',s),'=CELLREF("gone","q-id")','unknown rows stay explicit');
  assert.equal(readableFormula('=[A]@row',s),'=[A]@row');
 });
+
+test('keyboard point mode starts only after an operator and stays inside the grid',async()=>{
+ const {canPointAt,movePoint}=await import('../public/formula-picker.mjs');
+ assert.ok(canPointAt('=',1,1));assert.ok(canPointAt('=SUM(',5,5));assert.ok(canPointAt('=[A]@row * ',11,11));assert.ok(canPointAt('=IF([A]1>',9,9));
+ assert.ok(!canPointAt('=[A]@row',8,8),'after an operand arrows move the caret');assert.ok(!canPointAt('=SUM(',2,2));assert.ok(!canPointAt('hello +',7,7),'plain text never points');assert.ok(!canPointAt('=',0,1),'not with a selection');
+ assert.deepEqual(movePoint({ri:0,ci:0},'ArrowUp',10,3),{ri:0,ci:0});assert.deepEqual(movePoint({ri:9,ci:2},'ArrowRight',10,3),{ri:9,ci:2});assert.deepEqual(movePoint({ri:4,ci:1},'ArrowDown',10,3),{ri:5,ci:1});
+});

@@ -30,3 +30,7 @@ These tests establish the listed workflows, not exact parity with every Smartshe
 ## Update — v0.7.0 save queue
 
 Edits now display immediately and save through a strictly serialized queue (`public/edit-queue.mjs`). Each save is rebuilt on the newest server-confirmed workspace, so revision checks, lock enforcement, metadata and workflows behave as before. Undo and redo wait for earlier saves; their results become the confirmed base for any edits queued after them. A rejected save is removed from the display; a 409 conflict stops the queue and shows the existing draft/reload banner. Server-side history semantics (50 persistent steps, session ownership, redo invalidation) are unchanged and covered by `test/history.test.mjs` and `test/save-path.test.mjs`. See [UX-REVIEW-2026-11.md](UX-REVIEW-2026-11.md).
+
+## Update — v0.8.0 patch history
+
+New history rows store a reverse patch (`kind='patch'`) instead of a full workspace snapshot; older snapshot rows still undo. Saves go through `POST /api/patch` and stale tabs merge when they changed different fields. See [UX-REVIEW-2026-11.md](UX-REVIEW-2026-11.md) §6.

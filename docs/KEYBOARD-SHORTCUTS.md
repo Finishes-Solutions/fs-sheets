@@ -35,3 +35,9 @@ Undo and redo now persist up to 50 steps in SQLite, with atomic transitions, rev
 - After Enter or Tab, the cursor moves immediately; the save continues in the background ("Saving…").
 
 See [UX-REVIEW-2026-11.md](UX-REVIEW-2026-11.md) for verification details.
+
+## Update — v0.8.0
+
+- **Arrow keys while typing a formula** (caret after `=`, an operator, `(` or `,`): pick a cell reference; Shift+arrow extends it into a range.
+- **⌘G / Go to row** takes the row number shown in the grid.
+- The grid scrolls continuously; ⌘↑/⌘↓ jump to the first and last rows.

@@ -68,12 +68,37 @@ Recomputing all **18,835** formula cells in the 11,444-row budget with the share
 
 `npm test`: 238 passing, 0 failing (216 before this work). New suites: `column-editor`, `edit-queue`, `formula-picker` and `save-path`, plus a clipboard interop case in `grid-clipboard`.
 
+## 6. Follow-up: remaining risks addressed (v0.8.0)
+
+**Field-level patch saves (`lib/state-patch.mjs`, `POST /api/patch`).** The browser no longer uploads the whole workspace. It sends only the changed fields: individual cells, row fields, added/removed rows and sheets, sheet properties and order changes, each with its before and after value. The server applies the patch to its current state and then runs the unchanged `save()` pipeline (full validation, lock enforcement, metadata, mentions, workflows). It answers with its own field-level changes, applied to the confirmed state. A response is a few KB instead of 33 MB.
+
+| On the 11,444-row budget copy | v0.7 | v0.8 |
+|---|---|---|
+| Upload / response per edit | 33 MB / 33 MB | < 1 KB / < 20 KB |
+| Undo history per step | full 33 MB snapshot | reverse patch, usually < 5 KB |
+| Server time per save | ~0.85 s | ~0.5 s |
+| Enter → next cell | ~60 ms | ~36 ms |
+| Four rapid entries fully saved | ~6 s | ~2.8 s |
+
+**Concurrent tabs now merge instead of being blocked.** A patch from a tab with an older revision is applied when every field it changes is still at the value that tab saw, so edits to different cells, even in the same row, merge. The saving tab receives the merged workspace ("Saved and merged with changes from another tab"), and idle tabs load other tabs' saves automatically every few seconds. A real conflict is refused with 409 and the conflict banner, and nothing is overwritten: the same cell edited differently, a row edited in one tab and deleted in another, or concurrent column-definition changes. Verified with two browser tabs on the budget copy.
+
+**Undo history stores reverse patches.** Snapshot rows written by v0.6/v0.7 still undo correctly (`kind` column, default `state`). Undo/redo use a restoring apply mode, so a drifted field cannot leave undo permanently stuck. Session ownership, redo invalidation and the 50-step limit are unchanged.
+
+**Virtualized grid instead of 50-row pages.** About 120 rows are rendered at a time, with spacer rows sized from measured row heights. Scrolling swaps only the table body. Keyboard movement, ⌘↑/⌘↓ and selection slide the window, and the footer shows the live visible range. **Go to row** (⌘G) now takes the row number shown in the grid and says so when that row is hidden by a filter or collapsed parent.
+
+**Keyboard point mode for formulas.** While editing a cell formula, when the caret follows `=`, an operator, `(` or `,`, the arrow keys pick a cell reference and keep moving it. Shift+arrow extends it into a range, and typing anything else leaves point mode. After an operand, arrows move the caret as before.
+
+**Formula drawer beside the sheet.** On windows at least 900 px wide, the sheet narrows to sit beside the open ƒx drawer, so every column can be clicked to insert references. The active cell is scrolled into view.
+
+**Fixed along the way:** `GET /api/state` could return stored text missing the `dashboards`/`feedback`/`testing` defaults that the server applies in memory. It now always matches the server's state.
+
+Tests: 248 passing. New: `state-patch` (300 randomized round-trips; merge, conflict, idempotence and malformed-patch cases), patch API integration (fast path, stale-tab merge, conflict, legacy snapshot undo, multi-tab undo ownership, restart), point-mode helpers.
+
 ## Remaining limitations and risks
 
-- Each save still writes the whole workspace plus a 50-step snapshot history (~0.85 s server time on this database). Edits no longer wait for it, but saves queue up behind one another during bulk entry. A row-level patch protocol would be the real fix; it is a larger change to the save contract and was not attempted.
-- Browser memory: the client holds full workspace copies (displayed, confirmed and in-flight). On this 33 MB workspace that is fine on a laptop; much larger workspaces would need patching or virtualization.
-- Reference picking uses the mouse. Keyboard "point mode" (arrow keys inserting references, as in Excel) is not implemented.
-- Formula drawer picking needs the target cell to be visible beside the drawer (the drawer covers the right 520 px).
-- The grid still paginates 50 rows per page rather than virtual-scrolling.
-- Display order follows the hierarchy, so imported rows whose children precede their parent show non-sequential row numbers (for example 21, 24, …, 38, 22). Row numbers are stable identifiers here, not display positions. This is unchanged.
-- Local, single-machine edition: no authentication, permissions or merging of simultaneous edits. Conflicts are detected and blocked, not merged. **This is not evidence of enterprise readiness.**
+- The workspace is still stored as one SQLite row, so each save rewrites the ~33 MB state text (~140 ms write plus ~100 ms serialization of the server's ~0.5 s). Nothing waits on it any more, and transfers and history are small. A per-row storage schema would remove it; that is a data migration and was not done.
+- Merging is field-level: two tabs changing the **same** cell, the same column definition, or the same sheet setting still conflict, by design. There is no automatic resolution UI beyond the draft download and reload.
+- Virtual scrolling estimates spacer heights from the rendered rows. With text wrap and very uneven row heights, the scrollbar can shift slightly as rows render. Printing prints the rendered window, not every row.
+- Keyboard point mode works in inline cell editing; in the ƒx drawer, references are picked with the mouse.
+- Row numbers are stable identifiers; imported rows whose children precede their parent still display out of numeric order.
+- Local, single-machine use only, with no accounts or permissions (out of scope for now). **This is not evidence of enterprise readiness.**
