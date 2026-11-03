@@ -1,4 +1,5 @@
 import {DatabaseSync,backup} from 'node:sqlite';
+import {readStored,writeState} from '../lib/store.mjs';
 import {cp,mkdir,readFile,writeFile,stat,lstat,realpath} from 'node:fs/promises';
 import path from 'node:path';import {fileURLToPath} from 'node:url';import {randomUUID} from 'node:crypto';
 import {mergeImportedSheets} from './prepare-local-update.mjs';
@@ -10,7 +11,7 @@ export async function updateExistingRepo({repo,releaseApp,bundlePath}){
  const bundle=JSON.parse(await readFile(bundlePath,'utf8')),dbPath=path.join(repo,'data','fs-sheet.sqlite'),reader=new DatabaseSync(dbPath,{readOnly:true});
  let snapshot,result,backupDir;
  try{
-  snapshot=reader.prepare('SELECT revision,body FROM state WHERE id=1').get();if(!snapshot)throw Error('Existing project was not found.');
+  snapshot=readStored(reader);if(!snapshot)throw Error('Existing project was not found.');
   result=mergeImportedSheets(JSON.parse(snapshot.body),bundle);
   if(Buffer.byteLength(JSON.stringify(result.state))>64*1024*1024)throw Error('Combined project exceeds 64 MB.');
   const roots=['public','lib','assets','scripts','docs','test','node_modules','data/python','server.mjs','package.json','package-lock.json','README.md','AGENTS.md','requirements-excel.txt','Launch Sheets.command'];
@@ -28,13 +29,13 @@ export async function updateExistingRepo({repo,releaseApp,bundlePath}){
  const db=new DatabaseSync(dbPath);
  try{
   db.exec('BEGIN IMMEDIATE');
-  const latest=db.prepare('SELECT revision,body FROM state WHERE id=1').get();
+  const latest=readStored(db);
   if(latest.revision!==snapshot.revision||latest.body!==snapshot.body)throw Error('Project changed during the update. Code is updated, but imported sheets were not added; stop other servers before retrying.');
   if(result.added.length){
    db.exec('CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT,body TEXT NOT NULL,created_at TEXT NOT NULL)');
    if(!db.prepare('PRAGMA table_info(history)').all().some(c=>c.name==='client_id'))db.exec("ALTER TABLE history ADD COLUMN client_id TEXT NOT NULL DEFAULT ''");
    db.prepare('INSERT INTO history (body,created_at,client_id) VALUES (?,?,?)').run(snapshot.body,new Date().toISOString(),'local-update');
-   db.prepare('UPDATE state SET revision=?,body=? WHERE id=1').run(snapshot.revision+1,JSON.stringify(result.state));
+   writeState(db,snapshot.revision+1,result.state);
   }
   db.exec('COMMIT');
  }catch(e){db.exec('ROLLBACK');e.message+=' Backup: '+backupDir;throw e;}finally{db.close();}

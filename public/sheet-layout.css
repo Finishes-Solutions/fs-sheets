@@ -401,3 +401,48 @@ body.filling,body.filling *{cursor:crosshair!important;user-select:none}
 .sidebar>*{flex:none}
 .sidebar>.sheet-tree{flex:1 1 auto;min-height:64px;overflow-y:auto;overscroll-behavior:contain}
 .sidebar>.sidebar-bottom{flex:none;background:inherit}
+
+/* v0.9.1 menus: icon + label + shortcut, grouped sections (monochrome) */
+.grid-context-menu{min-width:244px;padding:6px}
+.grid-context-menu .menu-item{display:flex;align-items:center;gap:10px;min-height:32px;padding:6px 10px}
+.menu-item .mi-icon{width:16px;height:16px;flex:none;display:inline-flex;color:var(--ui-muted)}
+.menu-item .mi-label{flex:1;white-space:nowrap}
+.menu-item .mi-kbd{font:500 11px/1 inherit;font-family:inherit;color:var(--ui-muted);background:none;border:0;padding:0}
+.grid-context-menu .menu-item:hover .mi-icon,.grid-context-menu .menu-item:focus .mi-icon{color:var(--ui-ink)}
+.grid-context-menu .menu-item:disabled .mi-icon{opacity:.45}
+.grid-context-menu .menu-item.danger{color:#1d1d1f;font-weight:550}
+.grid-context-menu .menu-item.danger:hover,.grid-context-menu .menu-item.danger:focus{background:#1d1d1f;color:#fff}
+.grid-context-menu .menu-item.danger:hover .mi-icon,.grid-context-menu .menu-item.danger:focus .mi-icon{color:#fff}
+.context-menu-section{padding:4px 10px 2px;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ui-muted)}
+.grid-context-menu .context-menu-title{padding:6px 10px 6px;font-size:12px;font-weight:650;color:var(--ui-ink)}
+/* Format menu */
+.page-sheet .command-format .command-popover{width:404px;padding:0}
+.page-sheet .command-popover .format-menu{display:block;padding:0}
+.page-sheet .format-menu .format-head{padding:10px 14px 8px;border-bottom:1px solid var(--ui-line)}
+.page-sheet .format-menu .selection-caption{order:0;font-size:11.5px;color:var(--ui-muted)}
+.page-sheet .format-menu .format-section{display:grid;grid-template-columns:52px 1fr;grid-auto-flow:row;align-items:center;gap:8px 10px;padding:10px 14px 0}
+.page-sheet .format-menu .format-section>.tool-group+.tool-group{grid-column:2}
+.page-sheet .format-menu .tool-group{display:flex;gap:6px;flex-wrap:wrap}
+.page-sheet .format-menu .tool-group.segmented{gap:0;display:inline-flex;width:max-content;border:1px solid var(--ui-line);border-radius:6px;overflow:hidden}
+.page-sheet .command-popover .format-menu .format-tool{height:32px;gap:6px;padding:0 10px;font-size:12px}
+.page-sheet .command-popover .format-menu .format-tool.seg{border:0;border-radius:0;min-width:36px;justify-content:center;padding:0 8px}
+.page-sheet .command-popover .format-menu .format-tool.seg+.format-tool.seg{border-left:1px solid var(--ui-line)}
+.page-sheet .command-popover .format-menu .format-tool.wide{width:100%;justify-content:flex-start}
+.page-sheet .format-menu .format-tool .icon{flex:none}
+.page-sheet .format-menu .format-swatch{margin-left:auto;width:14px;height:14px;border-radius:3px;border:1px solid var(--ui-line);background:#fff}
+.page-sheet .format-menu .format-foot{display:block;margin-top:12px;padding:10px 14px 12px;border-top:1px solid var(--ui-line)}
+.page-sheet .format-menu .tool-group.segmented+.tool-group.segmented{grid-column:auto}
+.page-sheet .format-menu .format-row{display:flex;gap:8px}
+/* More tools: grouped list with disclosure chevrons */
+.page-sheet .command-more .command-popover{width:272px;padding:6px}
+.page-sheet .command-popover .sheet-menu-group>summary{display:flex;align-items:center;justify-content:space-between;min-height:32px;padding:6px 10px;border-radius:5px;font-size:12.5px;color:var(--ui-ink);cursor:pointer;list-style:none}
+.page-sheet .command-popover .sheet-menu-group>summary::-webkit-details-marker{display:none}
+.page-sheet .command-popover .sheet-menu-group>summary::after{content:"";width:6px;height:6px;border-right:1.5px solid var(--ui-muted);border-bottom:1.5px solid var(--ui-muted);transform:rotate(-45deg);transition:transform .12s}
+.page-sheet .command-popover .sheet-menu-group[open]>summary::after{transform:rotate(45deg)}
+.page-sheet .command-popover .sheet-menu-group>summary:hover{background:var(--ui-hover)}
+.page-sheet .command-popover .sheet-menu-group[open]>summary{font-weight:600}
+.page-sheet .command-popover .sheet-menu-dropdown{margin:2px 0 6px 10px;padding:2px 0 2px 8px;border-left:1px solid var(--ui-line);border-radius:0;background:transparent}
+.page-sheet .command-popover .sheet-menu-item{min-height:30px;padding:6px 10px;border-radius:5px;font-size:12px}
+.page-sheet .command-popover .sheet-menu-item:hover{background:var(--ui-hover)}
+.page-sheet .command-popover>button{min-height:32px;padding:6px 10px;border-radius:5px;font-size:12.5px}
+.page-sheet .command-popover>button:hover{background:var(--ui-hover)}

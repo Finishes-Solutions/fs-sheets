@@ -1,4 +1,5 @@
 import {DatabaseSync,backup} from 'node:sqlite';
+import {readStored,writeState} from '../lib/store.mjs';
 import {cp,mkdir,readFile,writeFile,stat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -35,7 +36,7 @@ export async function prepareLocalUpdate({sourceApp,releaseApp,targetApp,bundleP
  try{await backup(source,dbPath);}finally{source.close();}
  const db=new DatabaseSync(dbPath);let result;
  try{
-  const row=db.prepare('SELECT revision,body FROM state WHERE id=1').get();if(!row)throw Error('Existing project state was not found.');
+  const row=readStored(db);if(!row)throw Error('Existing project state was not found.');
   result=mergeImportedSheets(JSON.parse(row.body),bundle);
   // Keep an independent, exact pre-import snapshot beside the updated copy.
   await mkdir(path.join(targetApp,'backups'),{recursive:true});await backup(db,path.join(targetApp,'backups','before-local-update.sqlite'));
@@ -44,7 +45,7 @@ export async function prepareLocalUpdate({sourceApp,releaseApp,targetApp,bundleP
    db.exec('CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT, body TEXT NOT NULL, created_at TEXT NOT NULL)');
    if(!db.prepare('PRAGMA table_info(history)').all().some(c=>c.name==='client_id'))db.exec("ALTER TABLE history ADD COLUMN client_id TEXT NOT NULL DEFAULT ''");
    db.exec('BEGIN IMMEDIATE');
-   try{db.prepare('INSERT INTO history (body,created_at,client_id) VALUES (?,?,?)').run(row.body,new Date().toISOString(),'local-update');db.prepare('UPDATE state SET revision=?,body=? WHERE id=1').run(row.revision+1,body);db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}
+   try{db.prepare('INSERT INTO history (body,created_at,client_id) VALUES (?,?,?)').run(row.body,new Date().toISOString(),'local-update');writeState(db,row.revision+1,result.state);db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}
   }
  }finally{db.close();}
  const summary={version:JSON.parse(await readFile(path.join(targetApp,'package.json'),'utf8')).version,originalApp:sourceApp,updatedApp:targetApp,workspaceId:result.workspaceId,added:result.added,kept:result.kept};

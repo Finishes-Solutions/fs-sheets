@@ -40,6 +40,37 @@ export function moveRows(rows,ids,beforeId){
  return [...rest.slice(0,at),...block,...rest.slice(at)];
 }
 
+// ---- Hierarchy (indent / outdent) ----
+// Rows are a flat list in display order; parentId builds the tree. Only the topmost selected rows
+// move (their children come along). Edits rows in place; returns how many rows changed and why
+// the rest could not.
+const topSelected=(rows,ids)=>{const set=new Set(ids),byId=new Map(rows.map(r=>[r.id,r]));const covered=r=>{let p=byId.get(r.parentId);while(p){if(set.has(p.id))return true;p=byId.get(p.parentId);}return false;};return rows.filter(r=>set.has(r.id)&&!covered(r));};
+// Indent: each row becomes the last child of the row above it at the same level (its previous sibling).
+export function indentRows(rows,ids){
+ const tops=topSelected(rows,ids),moved=new Map(),original=new Map(rows.map(r=>[r.id,r.parentId??null]));let changed=0,blocked=0;
+ for(const r of tops){
+  const i=rows.indexOf(r);let prev=null;
+  for(let j=i-1;j>=0;j--){if((original.get(rows[j].id))===(original.get(r.id))){prev=rows[j];break;}if(rows[j].id===original.get(r.id))break;}
+  if(!prev){blocked++;continue;}
+  const parent=tops.includes(prev)?moved.get(prev.id):prev.id;
+  if(parent===undefined){blocked++;continue;}
+  r.parentId=parent;moved.set(r.id,parent);changed++;
+ }
+ return {changed,blocked};
+}
+// Outdent: the row moves up one level. Rows below it that shared its old parent become its children,
+// so the order on screen never changes (same as Smartsheet).
+export function outdentRows(rows,ids){
+ const tops=topSelected(rows,ids),byId=new Map(rows.map(r=>[r.id,r]));let changed=0,blocked=0,adopted=0;
+ for(const r of [...tops].reverse()){
+  const old=r.parentId??null;if(old===null){blocked++;continue;}
+  const i=rows.indexOf(r);
+  for(let j=i+1;j<rows.length;j++){const x=rows[j];if((x.parentId??null)===old){x.parentId=r.id;adopted++;}else{let p=byId.get(x.parentId),inside=false;while(p){if(p.id===old){inside=true;break;}p=byId.get(p.parentId);}if(!inside)break;}}
+  r.parentId=byId.get(old)?.parentId??null;changed++;
+ }
+ return {changed,blocked,adopted};
+}
+
 // ---- Find & replace ----
 const escapeRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 export function matcher({find,matchCase=false,wholeCell=false}){
@@ -57,4 +88,33 @@ export function findReplacePlan(cells,opts){
   if(!m.test(text)){skipped++;continue;}
   changes.push({row:c.row,column:c.column,value:m.replace(text,opts.replace)});}
  return {matches,changes,skipped};
+}
+
+// ---- Row heights for the virtual grid ----
+// Remembers the measured height of every row that has been on screen; rows not yet seen use the
+// average of measured rows. Offsets are prefix sums, so wrapped (tall) rows scroll accurately.
+export function createHeightIndex(fallback=29){
+ const heights=new Map();let version=0,sum=0,cache=null,frozen=null;
+ // The estimate for unseen rows is fixed once enough rows are measured, so measuring more rows
+ // never moves the rows already on screen.
+ const average=()=>frozen??(heights.size?sum/heights.size:fallback);
+ const offsets=rows=>{
+  if(cache&&cache.rows===rows&&cache.version===version)return cache.offsets;
+  const avg=average(),out=new Float64Array(rows.length+1);
+  for(let i=0;i<rows.length;i++){const h=heights.get(rows[i].id);out[i+1]=out[i]+(h===undefined?avg:h);}
+  cache={rows,version,offsets:out};return out;
+ };
+ return {
+  // Returns true when anything changed (by more than half a pixel).
+  set(id,h){if(!(h>4))return false;const old=heights.get(id);if(old!==undefined&&Math.abs(old-h)<=0.5)return false;heights.set(id,h);sum+=h-(old??0);version++;return true;},
+  clear(){heights.clear();sum=0;frozen=null;version++;},
+  freeze(min=20){if(frozen===null&&heights.size>=min){frozen=sum/heights.size;version++;}},
+  average,
+  offsets,
+  top:(rows,i)=>offsets(rows)[Math.max(0,Math.min(rows.length,i))],
+  total:rows=>offsets(rows)[rows.length],
+  // Index of the row containing y (row-space pixels).
+  indexAt(rows,y){const o=offsets(rows);if(!rows.length)return 0;let lo=0,hi=rows.length-1;while(lo<hi){const mid=(lo+hi+1)>>1;if(o[mid]<=y)lo=mid;else hi=mid-1;}return lo;},
+  get size(){return heights.size;}
+ };
 }
