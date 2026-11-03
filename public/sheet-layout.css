@@ -321,3 +321,39 @@ dialog.formula-drawer .modal-body,dialog.rules-drawer .modal-body{max-height:non
 /* Formula drawer sits beside the sheet (not over it) so any column can be clicked to insert a reference */
 @media(min-width:900px){body.formula-drawer-open #app>main{margin-right:min(520px,45vw);transition:margin-right .12s ease}
  body.formula-drawer-open dialog.formula-drawer{width:min(520px,45vw)}}
+
+/* ---- Row side panel (comments, files, proofs, history) ---- */
+#row-side-panel{position:fixed;top:40px;right:0;bottom:0;width:min(420px,92vw);z-index:65;display:flex;flex-direction:column;background:#fff;border-left:1px solid #dcdcdf;box-shadow:-12px 0 32px #0000001a;font-size:13px;color:#1d1d1f}
+@media(min-width:900px){body.row-panel-open #app>main{margin-right:min(420px,40vw)}body.row-panel-open #row-side-panel{width:min(420px,40vw)}}
+#row-side-panel .panel-head{display:flex;align-items:center;gap:4px;padding:14px 14px 10px 18px;border-bottom:1px solid #ececee}
+#row-side-panel .panel-head>div{flex:1;min-width:0}
+#row-side-panel .panel-head .eyebrow{font-size:11px;font-weight:600;color:#6b6b70;letter-spacing:.02em}
+#row-side-panel .panel-head h2{margin:2px 0 0;font-size:15px;line-height:20px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#row-side-panel .panel-step,#row-side-panel .panel-close{width:30px;height:30px;padding:0;border:0;border-radius:6px;background:transparent;font-size:16px;color:#333}
+#row-side-panel .panel-step:hover,#row-side-panel .panel-close:hover{background:#ececee}
+#row-side-panel .panel-tabs{display:flex;gap:2px;padding:6px 10px 0;border-bottom:1px solid #ececee}
+#row-side-panel .panel-tabs [role="tab"]{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:#555;font-size:12.5px}
+#row-side-panel .panel-tabs [role="tab"] svg{width:14px;height:14px}
+#row-side-panel .panel-tabs [role="tab"][aria-selected="true"]{color:#111;border-bottom-color:#1d1d1f;font-weight:600}
+#row-side-panel .panel-tabs [role="tab"]:hover{color:#111;background:#f5f5f6}
+#row-side-panel .panel-count{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e6e6e8;color:#333;font-size:11px;line-height:18px;text-align:center}
+#row-side-panel .panel-body{flex:1;min-height:0;overflow:auto;padding:14px 18px 20px}
+#row-side-panel .panel-thread{display:grid;gap:10px;margin-bottom:14px}
+#row-side-panel .panel-compose{position:sticky;bottom:-20px;background:#fff;padding:10px 0 4px;border-top:1px solid #ececee}
+#row-side-panel textarea{width:100%;box-sizing:border-box;min-height:72px;resize:vertical}
+#row-side-panel .panel-actions{display:flex;justify-content:flex-end;margin:8px 0}
+#row-side-panel .panel-actions.start{justify-content:flex-start;margin-top:0}
+#row-side-panel .panel-drop{display:grid;justify-items:center;gap:4px;padding:18px;margin-bottom:14px;border:1.5px dashed #c8c8cc;border-radius:8px;text-align:center;color:#444;cursor:pointer;background:#fafafa}
+#row-side-panel .panel-drop.dragging,#row-side-panel .panel-drop:hover{border-color:#333;background:#f2f2f3}
+#row-side-panel .panel-drop input{position:absolute;width:1px;height:1px;opacity:0}
+#row-side-panel .panel-drop small{color:#777}
+#row-side-panel .panel-filter{display:flex;gap:6px;margin-bottom:12px}
+#row-side-panel .panel-filter button{height:28px;padding:0 10px;border:1px solid #dcdcdf;border-radius:14px;background:#fff;font-size:12px}
+#row-side-panel .panel-filter button[aria-pressed="true"]{background:#1d1d1f;border-color:#1d1d1f;color:#fff}
+#row-side-panel .panel-history{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#row-side-panel .panel-history li{padding:10px 12px;border:1px solid #ececee;border-radius:8px}
+#row-side-panel .panel-history li>div{display:flex;justify-content:space-between;gap:8px}
+#row-side-panel .panel-history time,#row-side-panel .panel-history small{color:#777;font-size:11.5px}
+#row-side-panel .panel-history p{margin:4px 0;word-break:break-word}
+#row-side-panel .danger-text{color:#a11}
+#row-side-panel :focus-visible{outline:2px solid #2b2b2e;outline-offset:1px}
