@@ -13,7 +13,7 @@ const budget={id:111,name:'Job 42 Budget',permalink:'https://app.smartsheet.com/
  columns:[{id:2,index:1,title:'Qty',type:'TEXT_NUMBER'},{id:1,index:0,title:'Item',type:'TEXT_NUMBER',primary:true},{id:3,index:2,title:'Unit',type:'TEXT_NUMBER',format:',,,,,,,,,,,,,,2,,'},{id:4,index:3,title:'Total',type:'TEXT_NUMBER',formula:'=[Qty]@row * [Unit]@row',format:',,,,,,,,,,,,,,2,,'},{id:5,index:4,title:'Status',type:'PICKLIST',options:['Open','Done']},{id:6,index:5,title:'Owner',type:'CONTACT_LIST'},{id:7,index:6,title:'Due',type:'DATE'},{id:8,index:7,title:'Ok',type:'CHECKBOX'},{id:9,index:8,title:'Rate',type:'TEXT_NUMBER'},{id:10,index:9,title:'Row ID',type:'TEXT_NUMBER',systemColumnType:'AUTO_NUMBER'}],
  rows:[{id:500,rowNumber:1,cells:[{columnId:1,value:'Phase 1',format:',,1,,,,,,2,3,,,,,,,'},{columnId:4,value:300,formula:'=SUM(CHILDREN())'}]},
   {id:501,rowNumber:2,parentId:500,locked:true,cells:[{columnId:1,value:'Slab'},{columnId:2,value:10},{columnId:3,value:20},{columnId:4,value:200},{columnId:5,value:'Done'},{columnId:6,value:'pat@example.com',objectValue:{objectType:'CONTACT',email:'pat@example.com',name:'Pat'}},{columnId:7,value:'2025-03-01'},{columnId:8,value:true},{columnId:9,value:4,formula:'=SUM({Rates Range})'},{columnId:10,value:'J-0001'}]},
-  {id:502,rowNumber:3,parentId:500,cells:[{columnId:1,value:'Frame',hyperlink:{url:'https://example.com/spec'}},{columnId:2,value:5},{columnId:3,value:20},{columnId:4,value:100},{columnId:9,value:7.5,formula:'=AVGW([Qty]:[Qty], [Unit]:[Unit])'}]}],
+  {id:502,rowNumber:3,parentId:500,cells:[{columnId:1,value:'Frame',hyperlink:{url:'https://example.com/spec'}},{columnId:2,value:5},{columnId:3,value:20},{columnId:4,value:100},{columnId:9,value:7.5,formula:'=CELLIMAGE([Qty]:[Qty], [Unit]:[Unit])'}]}],
  crossSheetReferences:[{name:'Rates Range',sourceSheetId:222,startColumnId:21,endColumnId:21}],
  discussions:[{parentType:'ROW',parentId:501,comments:[{text:'Pour Tuesday',createdBy:{name:'Lee'},createdAt:'2025-02-01T10:00:00Z'}]}]};
 const rates={id:222,name:'Rates',columns:[{id:21,index:0,title:'Rate',type:'TEXT_NUMBER',primary:true}],rows:[{id:900,rowNumber:1,cells:[{columnId:21,value:4}]}]};
@@ -36,7 +36,7 @@ test('API sheets convert with hierarchy, types, formulas, comments and verificat
  assert.deepEqual(b.rows[0].cellFormats[col('Item').id],{bold:true,color:'#ff0000',fill:'#ffff00'});
  const state={sheets};verifyFormulas(state,sheets,report);
  const r=report.sheets[0];
- assert.equal(r.formulas,5);assert.equal(r.formulaMismatches.length,1,'AVGW is not supported here and is reported, not hidden');assert.equal(r.formulaMismatches[0].column,'Rate');
+ assert.equal(r.formulas,5);assert.equal(r.formulaMismatches.length,1,'CELLIMAGE is not supported here and is reported, not hidden');assert.deepEqual(report.unsupportedFunctions,[{name:'CELLIMAGE',count:1}]);assert.equal(r.formulaMismatches[0].column,'Rate');
  assert.equal(r.formulaMatches,4,'column formula rows, CHILDREN rollup and cross-sheet sum match Smartsheet');
 });
 

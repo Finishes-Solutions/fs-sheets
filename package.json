@@ -1,13 +1,14 @@
 {
   "name": "sheets",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": true,
   "type": "module",
   "description": "A local workspace for sheets, projects, and operations",
   "scripts": {
     "start": "node server.mjs",
     "dev": "node --watch server.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "office": "node scripts/start-office.mjs"
   },
   "engines": {
     "node": ">=24"

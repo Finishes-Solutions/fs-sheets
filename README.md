@@ -135,6 +135,10 @@ A **＋** at the far left of the column headers adds columns with a grouped type
 
 Saves send only changed cells and fields; undo history stores small reverse patches. Edits from two tabs to different cells merge, and only true same-cell conflicts are blocked. The grid scrolls continuously instead of paging 50 rows at a time, arrow keys can pick formula references, and the formula drawer sits beside the sheet. See [docs/UX-REVIEW-2026-11.md](docs/UX-REVIEW-2026-11.md) §6.
 
+## 0.11 — team use, versions, notifications, scheduling, forms, approvals, dashboards, phones
+
+Office-network sharing with an access code (`npm run office`), live updates and presence, a one-server lock for Dropbox, named versions and daily backups with per-sheet restore, email notifications and row watching, Gantt dependencies with critical path and auto-scheduling, more Smartsheet functions, shareable forms with conditional questions and photo uploads, row approvals, dashboard charts and TV mode, faster saves, a phone layout, folder imports and image previews. See [docs/FEATURES-v0.11.md](docs/FEATURES-v0.11.md).
+
 ## 0.10 — child rows, menus, per-sheet storage, printing
 
 Reliable indent/outdent ("Make child of row above"), redesigned menus with icons, one SQLite row per sheet with an automatic backup and verified conversion on first start, Smartsheet attachment import, full-sheet printing and accurate scrolling with wrapped rows. See [docs/FEATURES-v0.10.md](docs/FEATURES-v0.10.md).

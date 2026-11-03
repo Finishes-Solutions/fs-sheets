@@ -86,3 +86,18 @@ test('patch saves: small responses, stale-tab merges, conflicts, patch-based und
   assert.deepEqual((await get()).state,r.state);
  }finally{if(proc?.exitCode===null)await stop();await rm(dir,{recursive:true,force:true});}
 });
+
+test('patch fast path: untouched sheets are shared but never modified, and results match a full copy', async () => {
+  const {diffState,applyPatch}=await import('../lib/state-patch.mjs');
+  const {normalizeMetadata,collectMentions}=await import('../lib/workflows.mjs');
+  const base={people:[{id:'p',name:'Lee'}],inbox:[],requests:[],activity:[],sheets:[{id:'a',columns:[{id:'c',name:'A'}],rows:[{id:'r1',cells:{c:1},comments:[]}]},{id:'b',columns:[{id:'c',name:'B'}],rows:[{id:'r2',cells:{c:2},comments:[]}]}]};
+  Object.freeze(base.sheets[1]);Object.freeze(base.sheets[1].rows);Object.freeze(base.sheets[1].rows[0]);Object.freeze(base.sheets[1].rows[0].cells);
+  const want=structuredClone(base);want.sheets[0].rows[0].cells.c=5;want.sheets[0].rows[0].comments.push({id:'x',text:'@[Lee] hi'});
+  const patch=diffState(base,want);
+  const next={...structuredClone({...base,sheets:null}),sheets:base.sheets.map(s=>s.id==='a'?{...s,rows:s.rows.map(r=>structuredClone(r))}:s)};
+  applyPatch(next,patch);
+  assert.doesNotThrow(()=>{normalizeMetadata(base,next,'Pat','2026-11-03T00:00:00Z');collectMentions(base,next,'Pat','2026-11-03T00:00:00Z');},'frozen untouched sheet is never written');
+  assert.equal(next.sheets[1],base.sheets[1],'untouched sheet shared');
+  assert.equal(next.inbox.length,1);assert.equal(base.inbox.length,0,'base arrays not mutated');
+  assert.equal(diffState(base,next).sheets.length,1,'diff skips the shared sheet');
+});
