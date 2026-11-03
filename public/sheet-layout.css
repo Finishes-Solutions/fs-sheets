@@ -522,3 +522,20 @@ dialog.wide-dialog.people-dialog{max-width:min(860px,calc(100vw - 32px));width:m
 .form-cond input{width:120px}
 .form-link{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 4px}.form-link code{font-size:11.5px;color:var(--ui-muted)}
 .form-link button{height:28px;font-size:12px;display:inline-flex;align-items:center;gap:4px}
+/* v0.11 approvals */
+.panel-approvals{display:grid;gap:10px}.panel-approvals>button.wide{justify-self:start;display:inline-flex;gap:6px;align-items:center}
+.approval-card{border:1px solid var(--ui-line);border-radius:10px;padding:12px 14px;background:#fff}
+.approval-card.status-open{border-color:#1d1d1f;box-shadow:inset 3px 0 0 #1d1d1f}
+.approval-card header{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.approval-card .pill{border:1px solid var(--ui-line);border-radius:999px;padding:1px 8px;color:var(--ui-muted);font-weight:600}
+.approval-card .state{font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.approval-card h3{margin:6px 0 2px;font-size:14px}.approval-card .meta{margin:0 0 8px;font-size:11.5px;color:var(--ui-muted)}
+.approvers{list-style:none;margin:0;padding:0;display:grid;gap:6px}.approvers li{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:12.5px}
+.approvers .note{grid-column:2/-1;margin:0;color:var(--ui-muted);font-size:12px}
+.avatar.sm{width:22px;height:22px;border-radius:50%;background:#1d1d1f;color:#fff;font-size:9.5px;font-weight:600;display:inline-grid;place-items:center}
+.decision{font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;border:1px solid var(--ui-line)}
+.decision.approved{background:#1d1d1f;color:#fff;border-color:#1d1d1f}.decision.declined{background:#fff;color:#1d1d1f;border-color:#1d1d1f;text-decoration:line-through}.decision.waiting{color:var(--ui-muted)}
+.approval-respond{margin-top:10px;border-top:1px solid var(--ui-line);padding-top:10px}.approval-respond textarea{width:100%;box-sizing:border-box}
+.approval-entry b{display:inline-flex;align-items:center;gap:4px}
+#row-side-panel .panel-tabs{overflow-x:auto;scrollbar-width:none;gap:0}#row-side-panel .panel-tabs::-webkit-scrollbar{display:none}#row-side-panel .panel-tabs button{padding-left:8px;padding-right:8px;flex:none;font-size:12.5px}
+#row-side-panel .panel-tabs [role="tab"]{padding:0 7px;gap:4px;flex:none}
